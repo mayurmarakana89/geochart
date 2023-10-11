@@ -23,7 +23,7 @@ The viewer is being loaded in public/index.html as a script tag
 
 Developpers can import this project from their package.json directly and then import the [Chart component](https://github.com/Canadian-Geospatial-Platform/geochart/blob/main/src/chart.tsx).
 
-Alternatively, developpers can run this project standalone to manually send `data` and `options` JSON values to the Chart and observe how it reacts.
+Alternatively, developpers can run this project standalone to manually send `data` and `options` JSON values, via the user interface, to the Chart and observe how it reacts.
 
 ## Running the project
 
