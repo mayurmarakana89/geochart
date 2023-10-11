@@ -1,5 +1,7 @@
 # GeoChart Component
 
+## Overview
+
 This project is the GeoChart Component (not to be confused with the [GeoView GeoChart Plugin](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-geochart)).
 
 IMPORTANT: This component uses react-chart-js which also has a react dependency. For compatibility reasons:
