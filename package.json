@@ -1,5 +1,5 @@
 {
-  "name": "geoview-plugins-demo",
+  "name": "geoview-geochart",
   "version": "0.1.0",
   "description": "A demo app that uses the GeoView APIs",
   "main": "src/index.tsx",
@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Canadian-Geospatial-Platform/GeoView-Plugins-Demo"
+    "url": "https://github.com/Canadian-Geospatial-Platform/geochart"
   },
   "scripts": {
     "serve": "webpack serve --progress --color --config webpack.dev.js",
@@ -15,13 +15,14 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "@emotion/react": "^11.8.1",
-    "@emotion/styled": "^11.8.1",
-    "@mui/icons-material": "^5.5.0",
-    "@mui/material": "^5.5.0",
-    "@mui/styles": "^5.5.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.6",
+    "@mui/material": "^5.14.6",
+    "chart.js": "^4.4.0",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
@@ -29,8 +30,8 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
-    "@types/react": "^17.0.39",
-    "@types/react-dom": "^17.0.11",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "babel-loader": "^8.2.3",
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.6.0",
@@ -39,9 +40,11 @@
     "gh-pages": "^3.2.3",
     "html-webpack-plugin": "^5.5.0",
     "path": "^0.12.7",
+    "prettier": "^2.6.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
     "typescript": "^4.5.5",
+    "typescript-plugin-css-modules": "^5.0.1",
     "webpack": "^5.69.1",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4"

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Charts</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+
+    <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
+
+    <script>
+      const DATA_NATIVE_1 = {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [
+          {
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+            ],
+            borderWidth: 1,
+          },
+        ]
+      };
+
+      const DATA_NATIVE_2 = {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [
+          {
+            label: 'Dataset 1',
+            data: [12, 19, 3, 5, 2, 3],
+            borderColor: "rgba(255, 99, 132, 0.5)",
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          },
+          {
+            label: 'Dataset 2',
+            data: [22, 29, 13, 15, 12, 13],
+            borderColor: "rgba(53, 162, 235, 0.5)",
+            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+          },
+        ],
+      };
+
+      const OPTIONS_NATIVE_1 = {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        geochart: {
+          chart: "line",
+          xSlider: {
+            display: false,
+            min: 0,
+            max: 18,
+            value: 5,
+            track: false,
+          },
+          ySlider: {
+            display: false,
+            min: 0,
+            max: 18,
+            value: 5,
+            track: false,
+          },
+          xAxis: {
+            type: 'time'
+          },
+          yAxis: {
+            type: 'time'
+          },
+        }
+      };
+
+      const OPTIONS_NATIVE_2 = {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          y: {
+            border: {
+              color: "red"
+            },
+            suggestedMin: 0,
+            suggestedMax: 50,
+          }
+        },
+        geochart: {
+          chart: "line",
+          xSlider: {
+            display: true,
+            min: 0,
+            max: 30,
+            value: 15,
+            track: 'normal',
+          },
+          ySlider: {
+            display: true,
+            min: 0,
+            max: 30,
+            value: 30,
+            track: 'normal',
+          },
+          xAxis: {
+            type: 'time'
+          },
+          yAxis: {
+            type: 'time'
+          },
+        }
+      };
+    </script>
+  </head>
+
+  <body>
+    <div class="" style="text-align: center;">
+      <div style="background-color: aliceblue;">
+        <div style="text-align: left;">
+          CHART INPUTS
+        </div>
+        <div>
+          <div style="display:inline-block;width:49%;">
+            <div>
+              <button onclick="importDataParsed(DATA_NATIVE_1)">Import Data Native Chart.js 1</button>
+              <button onclick="importDataParsed(DATA_NATIVE_2)">Import Data Native Chart.js 2</button>
+            </div>
+            <div>
+              <textarea id="CHARTDATAPARSED" rows="20" style="width: 100%;"></textarea>
+            </div>
+          </div>
+          <div style="display:inline-block;width:49%;">
+            <div>
+              <button onclick="importOptionsParsed(OPTIONS_NATIVE_1)">Import Options 1</button>
+              <button onclick="importOptionsParsed(OPTIONS_NATIVE_2)">Import Options 2</button>
+            </div>
+            <div>
+              <textarea id="CHARTOPTIONSPARSED" rows="20" style="width: 100%;"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <button onclick="buildChart()" style="padding:5px;"><strong>BUILD CHART FROM CHART INPUTS</strong></button>
+      </div>
+    </div>
+
+    <script>
+      function importDataParsed(data) {
+        document.getElementById('CHARTDATAPARSED').value = JSON.stringify(data, null, 2);
+      }
+
+      function importOptionsParsed(options) {
+        document.getElementById('CHARTOPTIONSPARSED').value = JSON.stringify(options, null, 2);
+      }
+      
+      function buildChart() {
+        let data = JSON.parse(document.getElementById('CHARTDATAPARSED').value);
+        let options = JSON.parse(document.getElementById('CHARTOPTIONSPARSED').value);
+        
+        // Emit a Chart Changed event so the chart updates
+        window.dispatchEvent(new CustomEvent("chart/load", {detail: { data, options }}));
+      }
+
+      // Load data 1
+      importDataParsed(DATA_NATIVE_1);
+      importOptionsParsed(OPTIONS_NATIVE_1);
+
+      // Wait 1 second for index.tsx to execute and the Chart to enter the DOM.
+      // Hacky, but it's only to load default values off the start. It is also because we don't have a cgpv.init callback.
+      setTimeout(() => {
+        buildChart();
+      }, 1000);
+    </script>
+
+    <div id="root2aca7b6b288c"></div>
+  </body>
+
+</html>

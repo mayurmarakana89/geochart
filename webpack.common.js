@@ -5,7 +5,7 @@ const package = require('./package.json');
 
 // get version numbers
 const [major, minor, patch] = package.version.split('.');
-console.log(`Build Demo Plugin: ${major}.${minor}.${patch}`);
+console.log(`Build GeoChart Plugin: ${major}.${minor}.${patch}`);
 
 const config = {
   entry: {
@@ -17,12 +17,16 @@ const config = {
     chunkFilename: '[name].js',
   },
   resolve: {
-    extensions: ['.mjs', '.ts', '.tsx', '.js', '.jsx'],
+    extensions: ['.mjs', '.ts', '.tsx', '.js', '.jsx', '.css'],
+  },
+  externals: {
+    react: 'cgpv.react',
+    'react-dom': 'cgpv.reactDOM',
   },
   module: {
     rules: [
       {
-        test: /.(js|jsx)$/,
+        test: /.(ts|tsx|js|jsx)$/,
         exclude: /node_modules/,
         use: [
           {
@@ -39,11 +43,6 @@ const config = {
         ],
       },
       {
-        test: /\.(ts|tsx)$/,
-        exclude: /node_modules/,
-        use: ['ts-loader'],
-      },
-      {
         test: /\.(css|scss)$/,
         use: ['style-loader', 'css-loader'],
       },
@@ -55,16 +54,16 @@ const config = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './public/index.html',
+      template: './index.html',
       filename: 'index.html',
     }),
     new CopyWebpackPlugin({
       patterns: [
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
-        { from: './public/favicon.ico' },
+        { from: './favicon.ico' },
       ],
     }),
-  ],
+  ]
 };
 
 module.exports = config;
