@@ -45,14 +45,14 @@ cd geochart
 $ npm install
 ```
 
-### Run the project
-
-```
-$ npm run serve
-```
-
 ## Building the project
 
 ```
 $ npm run build
+```
+
+### Run the project
+
+```
+$ npm run serve
 ```
