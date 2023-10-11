@@ -19,6 +19,12 @@ The viewer is being loaded in public/index.html as a script tag
 <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
 ```
 
+## How it works
+
+Developpers can import this project from their package.json directly and then import the [Chart component](https://github.com/Canadian-Geospatial-Platform/geochart/blob/main/src/chart.tsx).
+
+Alternatively, developpers can run this project standalone to play with the `data` and the `options` JSON values to send to the Chart via the user interface.
+
 ## Running the project
 
 ### First clone this repo
