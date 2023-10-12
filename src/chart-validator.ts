@@ -53,13 +53,16 @@ export class ChartValidator {
     }
 
     /**
-     * Construct a Chart Validate object to validate schemas.
+     * Constructs a Chart Validate object to validate schemas.
      */
     constructor() {
         // The embedded JSON validator
         this.ajv = new Ajv();
     }
 
+    /**
+     * Validates the data input parameters.
+     */
     validateData = (data: any): ValidatorResult => {
         // Compile
         const validate = this.ajv.compile(this.SCHEMA_DATA);
@@ -71,6 +74,9 @@ export class ChartValidator {
         }
     }
 
+    /**
+     * Validates the options input parameters.
+     */
     validateOptions = (options: any): ValidatorResult => {
         // Compile
         const validate = this.ajv.compile(this.SCHEMA_OPTIONS);

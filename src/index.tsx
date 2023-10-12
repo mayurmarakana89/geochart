@@ -1,4 +1,5 @@
 export * from './chart-types';
+export * from './chart-validator';
 export * from './chart';
 
 import App from './app';

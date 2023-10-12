@@ -15,8 +15,8 @@ const App = (): JSX.Element => {
     const { useEffect, useState } = react;
     
     // Wire handler
-    const [data, setData] = useState({});
-    const [options, setOptions] = useState({});
+    const [data, setData] = useState();
+    const [options, setOptions] = useState();
 
     const handleChartLoad = (e: Event) => {
         const ev = e as CustomEvent;
