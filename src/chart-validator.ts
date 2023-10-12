@@ -1,5 +1,8 @@
 import Ajv from 'ajv';
 
+/**
+ * Represents the result of a Chart data or options inputs validations.
+ */
 export type ValidatorResult = {
     valid: boolean;
     errors?: string[];
