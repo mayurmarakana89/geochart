@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { ChartData, ChartOptions, DefaultDataPoint } from 'chart.js';
 import { GeoChartOptions, GeoChartType, GeoChartData} from './chart-types';
+import { ChartValidator, ValidatorResult } from './chart-validator';
 import { ChartDoughnut } from './charts/chart-doughnut';
 import { ChartBarsVertical } from './charts/chart-bars-vertical';
 import { ChartPie } from './charts/chart-pie';
@@ -17,6 +18,7 @@ export interface TypeChartChartProps<TType extends GeoChartType> {
   redraw?: boolean;
   handleSliderXChanged?: (value: number | number[]) => void;
   handleSliderYChanged?: (value: number | number[]) => void;
+  handleError?: (dataErrors: ValidatorResult, optionsErrors: ValidatorResult) => void;
 }
 
 /**
@@ -29,8 +31,28 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
   // Fetch cgpv
   const w = window as any;
   const { cgpv } = w;
+  const { useEffect } = cgpv.react;
   const { Slider } = cgpv.ui.elements;
   const { style, data, options, redraw } = props;
+
+  useEffect(() => {
+    // If both data and options are set
+    if (data && options && Object.keys(data).length > 0 && Object.keys(options).length > 0) {
+      // Validate the data and options
+      const validator = new ChartValidator();
+      const resData: ValidatorResult = validator.validateData(data);
+      const resOptions: ValidatorResult = validator.validateOptions(options);
+
+      // If any errors
+      if (!resData.valid || !resOptions.valid) {
+        // If a callback is defined
+        if (props.handleError)
+          props.handleError(resData, resOptions);
+        else
+          console.error(resData, resOptions);
+      }      
+    }
+  }, [data, options]);
   
   const _handleSliderXChange = (value: number | number[]) => {
     // If callback set
@@ -152,7 +174,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * @returns The whole Chart container JSX.Element or an empty div
    */
   const renderChartContainer = (): JSX.Element => {
-    if (options && options.geochart && options.geochart.chart) {
+    if (options && options.geochart) {
       return (
         <div style={style} className={styles.chartContainer}>
           <div className={styles.chartContainerGrid1}>{renderChart()}</div>

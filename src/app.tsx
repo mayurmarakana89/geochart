@@ -1,4 +1,5 @@
 import { Chart } from './chart';
+import { ValidatorResult } from './chart-validator';
 
 /**
  * Create a container to visualize a GeoChart in a standalone manner.
@@ -27,6 +28,27 @@ const App = (): JSX.Element => {
         }
     };
 
+    const handleError = (dataErrors: ValidatorResult, optionsErrors: ValidatorResult) => {
+        // Gather all error messages
+        let msgData = "";
+        dataErrors.errors?.forEach((m: string) => {
+            msgData += m + '\n';
+        });
+
+        // Gather all error messages
+        let msgOptions = "";
+        optionsErrors.errors?.forEach((m: string) => {
+            msgOptions += m + '\n';
+        });
+
+        // Show the error (actually, can't because the snackbar is linked to a map at the moment and geochart is standalone)
+        // TODO: Decide if we want the snackbar outside of a map or not and use showError or not
+        cgpv.api.utilities.showError('', msgData);
+        cgpv.api.utilities.showError('', msgOptions);
+        console.error(dataErrors.errors, optionsErrors.errors);
+        alert("There was an error parsing the Chart inputs. View console for details.");
+    };
+
     const handleChartXAxisChanged = () => {
         console.log("Handle Chart X Axis");
     };
@@ -52,6 +74,7 @@ const App = (): JSX.Element => {
             //redraw={shouldRedraw}
             handleSliderXChanged={handleChartXAxisChanged}
             handleSliderYChanged={handleChartYAxisChanged}
+            handleError={handleError}
         />
     );
   };
