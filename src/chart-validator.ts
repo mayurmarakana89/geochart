@@ -5,6 +5,9 @@ export type ValidatorResult = {
     errors?: string[];
 }
 
+/**
+ * The Char Validator class to validate data and options inputs.
+ */
 export class ChartValidator {
 
     // The JSON validator used by ChartValidate
