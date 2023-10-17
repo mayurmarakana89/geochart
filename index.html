@@ -59,45 +59,51 @@
         ],
       };
 
-      const OPTIONS_NATIVE_1 = {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
+      const OPTIONS_NATIVE_1_A = {
         geochart: {
-          chart: "line",
-          xSlider: {
-            display: false,
-            min: 0,
-            max: 18,
-            value: 5,
-            track: false,
-          },
-          ySlider: {
-            display: false,
-            min: 0,
-            max: 18,
-            value: 5,
-            track: false,
-          },
-          xAxis: {
-            type: 'time'
-          },
-          yAxis: {
-            type: 'time'
-          },
+          chart: "line"
+        }
+      };
+
+      const OPTIONS_NATIVE_1_B = {
+        geochart: {
+          chart: "bar"
+        }
+      };
+
+      const OPTIONS_NATIVE_1_C = {
+        geochart: {
+          chart: "pie"
+        }
+      };
+
+      const OPTIONS_NATIVE_1_D = {
+        geochart: {
+          chart: "doughnut"
         }
       };
 
       const OPTIONS_NATIVE_2 = {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
+        geochart: {
+          chart: "line",
+          xSlider: {
+            display: true,
+            min: 0,
+            max: 30,
+            value: 15,
+            track: 'normal',
           },
-        },
+          ySlider: {
+            display: true,
+            min: 0,
+            max: 30,
+            value: 30,
+            track: 'normal',
+          }
+        }
+      };
+
+      const OPTIONS_NATIVE_3 = {
         scales: {
           y: {
             border: {
@@ -152,8 +158,12 @@
           </div>
           <div style="display:inline-block;width:49%;">
             <div>
-              <button onclick="importOptionsParsed(OPTIONS_NATIVE_1)">Import Options 1</button>
-              <button onclick="importOptionsParsed(OPTIONS_NATIVE_2)">Import Options 2</button>
+              <button onclick="importOptionsParsed(OPTIONS_NATIVE_1_A)">Import Options Line (default)</button>
+              <button onclick="importOptionsParsed(OPTIONS_NATIVE_1_B)">Import Options Bar</button>
+              <button onclick="importOptionsParsed(OPTIONS_NATIVE_1_C)">Import Options Pie</button>
+              <button onclick="importOptionsParsed(OPTIONS_NATIVE_1_D)">Import Options Doughnut</button>
+              <button onclick="importOptionsParsed(OPTIONS_NATIVE_2)">Import Options Line w/ Sliders</button>
+              <button onclick="importOptionsParsed(OPTIONS_NATIVE_3)">Import Options All-in</button>
             </div>
             <div>
               <textarea id="CHARTOPTIONSPARSED" rows="20" style="width: 100%;"></textarea>
@@ -177,16 +187,33 @@
       }
       
       function buildChart() {
-        let data = JSON.parse(document.getElementById('CHARTDATAPARSED').value);
-        let options = JSON.parse(document.getElementById('CHARTOPTIONSPARSED').value);
+        let data = {};
+        let options = {};
         
+        try {
+          if (document.getElementById('CHARTDATAPARSED').value)
+            data = JSON.parse(document.getElementById('CHARTDATAPARSED').value);
+        }
+        catch (ex) {
+          alert('Failed to create JSON from input data text area.');
+          console.error(ex);
+        }
+        try {
+          if (document.getElementById('CHARTOPTIONSPARSED').value)
+            options = JSON.parse(document.getElementById('CHARTOPTIONSPARSED').value);
+        }
+        catch (ex)  {
+          alert('Failed to create JSON from input options text area.');
+          console.error(ex);
+        }
+
         // Emit a Chart Changed event so the chart updates
         window.dispatchEvent(new CustomEvent("chart/load", {detail: { data, options }}));
       }
 
       // Load data 1
       importDataParsed(DATA_NATIVE_1);
-      importOptionsParsed(OPTIONS_NATIVE_1);
+      importOptionsParsed(OPTIONS_NATIVE_1_A);
 
       // Wait 1 second for index.tsx to execute and the Chart to enter the DOM.
       // Hacky, but it's only to load default values off the start. It is also because we don't have a cgpv.init callback.

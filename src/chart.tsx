@@ -33,27 +33,28 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
   const { cgpv } = w;
   const { useEffect } = cgpv.react;
   const { Slider } = cgpv.ui.elements;
-  const { style, data, options, redraw } = props;
-
-  useEffect(() => {
-    // If both data and options are set
-    if (data && options && Object.keys(data).length > 0 && Object.keys(options).length > 0) {
-      // Validate the data and options
-      const validator = new ChartValidator();
-      const resData: ValidatorResult = validator.validateData(data);
-      const resOptions: ValidatorResult = validator.validateOptions(options);
-
-      // If any errors
-      if (!resData.valid || !resOptions.valid) {
-        // If a callback is defined
-        if (props.handleError)
-          props.handleError(resData, resOptions);
-        else
-          console.error(resData, resOptions);
-      }      
-    }
-  }, [data, options]);
+  const { style, data, options: elOptions, redraw } = props;
   
+  // Merge default options
+  let options: GeoChartOptions = { ...Chart.defaultProps.options, ...elOptions } as GeoChartOptions;
+  
+  // If options and data are specified
+  if (options && data) {
+    // Validate the data and options as received
+    const validator = new ChartValidator();
+    const resOptions: ValidatorResult = validator.validateOptions(options);
+    const resData: ValidatorResult = validator.validateData(data);
+    
+    // If any errors
+    if (!resOptions.valid || !resData.valid) {
+      // If a callback is defined
+      if (props.handleError)
+        props.handleError(resData, resOptions);
+      else
+        console.error(resData, resOptions);
+    }
+  }
+
   const _handleSliderXChange = (value: number | number[]) => {
     // If callback set
     if (props.handleSliderXChanged) {
@@ -74,7 +75,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    */
   const renderChart = (): JSX.Element => {
     // Depending on the type of chart
-    switch (options!.geochart.chart) {
+    switch (options.geochart.chart) {
       case 'bar':
         // Vertical Bars Chart
         return (
@@ -126,7 +127,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * @returns The X Chart Slider JSX.Element or an empty div
    */
   const renderXSlider = () : JSX.Element => {
-    const { xSlider } = options!.geochart;
+    const { xSlider } = options.geochart;
     if (xSlider?.display) {
       return (
         <Box sx={{ height: '100%' }}>
@@ -150,7 +151,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * @returns The Y Chart Slider JSX.Element or an empty div
    */
   const renderYSlider = (): JSX.Element => {
-    const { ySlider } = options!.geochart;
+    const { ySlider } = options.geochart;
     if (ySlider?.display) {
       return (
         <Box sx={{ height: '100%' }}>
@@ -166,6 +167,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
         </Box>
       );
     }
+    // None
     return <div />;
   };
 
@@ -174,7 +176,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * @returns The whole Chart container JSX.Element or an empty div
    */
   const renderChartContainer = (): JSX.Element => {
-    if (options && options.geochart) {
+    if (options.geochart && data?.datasets && data?.labels) {
       return (
         <div style={style} className={styles.chartContainer}>
           <div className={styles.chartContainerGrid1}>{renderChart()}</div>
@@ -184,8 +186,27 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
         </div>
       );
     }
-    return <div />;
+    else {
+      return <div/>;
+    }
   }
 
   return renderChartContainer();
 }
+
+/**
+ * React's default properties for the GeoChart
+ */
+Chart.defaultProps = {
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    geochart: {
+      chart: 'line',
+    },
+  },
+};
