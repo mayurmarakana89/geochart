@@ -28,6 +28,11 @@ export function App(): JSX.Element {
     }
   };
 
+  /**
+   * Handles an error that happened in the Chart component.
+   * @param dataErrors The data errors that happened (if any)
+   * @param optionsErrors The options errors that happened (if any)
+   */
   const handleError = (dataErrors: ValidatorResult, optionsErrors: ValidatorResult) => {
     // Gather all error messages
     let msgData = '';
