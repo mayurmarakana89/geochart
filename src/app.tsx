@@ -2,7 +2,7 @@ import { Chart } from './chart';
 import { ValidatorResult } from './chart-validator';
 
 /**
- * Create a container to visualize a GeoChart in a standalone manner.
+ * Create a container to visualize a GeoChart in a standalone manner..
  *
  * @returns {JSX.Elemet} the element that has the GeoChart
  */
@@ -18,6 +18,9 @@ export function App(): JSX.Element {
   const [data, setData] = useState();
   const [options, setOptions] = useState();
 
+  /**
+   * Handles when the Chart has to be loaded with data or options.
+   */
   const handleChartLoad = (e: Event) => {
     const ev = e as CustomEvent;
     if (ev.detail.data) {
