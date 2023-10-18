@@ -71,7 +71,6 @@ export function App(): JSX.Element {
       style={{ width: 800 }}
       data={data}
       options={options}
-      // redraw={shouldRedraw}
       handleSliderXChanged={handleChartXAxisChanged}
       handleSliderYChanged={handleChartYAxisChanged}
       handleError={handleError}
