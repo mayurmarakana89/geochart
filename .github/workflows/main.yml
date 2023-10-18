@@ -12,6 +12,8 @@ jobs:
   build_and_create_artifact:
     name: Build and create artifacts
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       # Checkout
       - name: Checkout repository
