@@ -1,18 +1,7 @@
 /* eslint-disable no-console */
 // TODO: Remove the disable above
 import { Box } from '@mui/material';
-import {
-  Chart as ChartJS,
-  ChartDataset,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  ArcElement,
-} from 'chart.js';
+import { Chart as ChartJS, ChartDataset, registerables } from 'chart.js';
 import { Chart as ChartReact } from 'react-chartjs-2';
 import { GeoChartOptions, GeoChartType, GeoChartData, GeoChartAction, GeoChartDefaultColors } from './chart-types';
 import { ChartValidator, ValidatorResult } from './chart-validator';
@@ -52,6 +41,9 @@ const sxClasses = {
  * @returns {JSX.Element} the created Chart element
  */
 export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
+  // Prep ChartJS
+  ChartJS.register(...registerables);
+
   // Fetch cgpv
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const w = window as any;
@@ -273,11 +265,10 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
     return <div />;
   };
 
-  // Effect hook to add and remove event listeners
-  useEffect(() => {
-    // Prep ChartJS
-    ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, ArcElement);
-  }, []);
+  // // Effect hook to add and remove event listeners
+  // useEffect(() => {
+    
+  // }, []);
 
   return renderChartContainer();
 }
