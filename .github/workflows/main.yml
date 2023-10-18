@@ -13,8 +13,12 @@ jobs:
     name: Build and create artifacts
     runs-on: ubuntu-latest
     permissions:
+      deployments: write
       contents: write
       packages: write
+      statuses: write
+      actions: write
+      checks: read
     steps:
       # Checkout
       - name: Checkout repository
