@@ -4,7 +4,7 @@ import { ValidatorResult } from './chart-validator';
 /**
  * Create a container to visualize a GeoChart in a standalone manner.
  *
- * @returns {JSX.Elemet} the element that has the GeoChart
+ * @returns {JSX.Element} the element that has the GeoChart
  */
 export function App(): JSX.Element {
   // Fetch the cgpv module
