@@ -132,22 +132,8 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * @returns The Chart JSX.Element itself using Line as default
    */
   const renderChart = (): JSX.Element => {
-    // Depending on the type of chart
-    switch (options.geochart.chart) {
-      case 'bar':
-        return <ChartReact ref={chartRef} type="bar" style={style} data={data!} options={options} redraw={redraw} />;
-
-      case 'pie':
-        return <ChartReact ref={chartRef} type="pie" style={style} data={data!} options={options} redraw={redraw} />;
-
-      case 'doughnut':
-        // Doughnut Chart
-        return <ChartReact ref={chartRef} type="doughnut" style={style} data={data!} options={options} redraw={redraw} />;
-
-      default:
-        // Line Chart is default
-        return <ChartReact ref={chartRef} type="line" style={style} data={data!} options={options} redraw={redraw} />;
-    }
+    // Create the Chart React
+    return <ChartReact ref={chartRef} type={options.geochart.chart} style={style} data={data!} options={options} redraw={redraw} />;
   };
 
   /**
@@ -264,11 +250,6 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
 
     return <div />;
   };
-
-  // // Effect hook to add and remove event listeners
-  // useEffect(() => {
-    
-  // }, []);
 
   return renderChartContainer();
 }
