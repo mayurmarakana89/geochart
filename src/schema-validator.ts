@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
-import SCHEMA_DATA from './schema-validator-data.json';
-import SCHEMA_OPTIONS from './schema-validator-options.json';
+import SCHEMA_DATA from '../schema-data.json';
+import SCHEMA_OPTIONS from '../schema-options.json';
 
 /**
  * Represents the result of a Chart data or options inputs validations.
