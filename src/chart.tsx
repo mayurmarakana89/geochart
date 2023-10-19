@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 import { Chart as ChartJS, ChartDataset, registerables } from 'chart.js';
 import { Chart as ChartReact } from 'react-chartjs-2';
 import { GeoChartOptions, GeoChartType, GeoChartData, GeoChartAction, GeoChartDefaultColors } from './chart-types';
-import { ChartValidator, ValidatorResult } from './chart-validator';
+import { SchemaValidator, ValidatorResult } from './schema-validator';
 
 /**
  * Main props for the Chart
@@ -24,6 +24,10 @@ export interface TypeChartChartProps<TType extends GeoChartType> {
  * SX Classes for the Chart
  */
 const sxClasses = {
+  chartError: {
+    fontStyle: 'italic',
+    color: 'red',
+  },
   checkDatasetWrapper: {
     display: 'inline-block',
   },
@@ -84,7 +88,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * Handles when the X Slider changes
    * @param value number | number[] Indicates the slider value
    */
-  const handleSliderXChange = (value: number | number[]) => {
+  const handleSliderXChange = (value: number | number[]): void => {
     // Callback
     handleSliderXChanged?.(value);
   };
@@ -93,7 +97,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * Handles when the Y Slider changes
    * @param value number | number[] Indicates the slider value
    */
-  const handleSliderYChange = (value: number | number[]) => {
+  const handleSliderYChange = (value: number | number[]): void => {
     // Callback
     handleSliderYChanged?.(value);
   };
@@ -103,7 +107,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * @param datasetIndex number Indicates the dataset index that was checked/unchecked
    * @param checked boolean Indicates the checked state
    */
-  const handleDatasetChecked = (datasetIndex: number, checked: boolean) => {
+  const handleDatasetChecked = (datasetIndex: number, checked: boolean): void => {
     // Toggle visibility of the dataset
     chartRef.current.setDatasetVisibility(datasetIndex, checked);
     chartRef.current.update();
@@ -119,8 +123,8 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
   };
 
   /**
-   * Renders the X Chart Slider JSX.Element or an empty div
-   * @returns The X Chart Slider JSX.Element or an empty div
+   * Renders the X Chart Slider JSX.Element or an empty box
+   * @returns The X Chart Slider JSX.Element or an empty box
    */
   const renderXSlider = (): JSX.Element => {
     const { xSlider } = options.geochart;
@@ -132,19 +136,18 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
             min={xSlider.min || 0}
             max={xSlider.max || 100}
             value={xSlider.value || 0}
-            track={xSlider.track || false}
             customOnChange={handleSliderXChange}
           />
         </Box>
       );
     }
     // None
-    return <div />;
+    return <Box />;
   };
 
   /**
-   * Renders the Y Chart Slider JSX.Element or an empty div
-   * @returns The Y Chart Slider JSX.Element or an empty div
+   * Renders the Y Chart Slider JSX.Element or an empty box
+   * @returns The Y Chart Slider JSX.Element or an empty box
    */
   const renderYSlider = (): JSX.Element => {
     const { ySlider } = options.geochart;
@@ -156,7 +159,6 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
             min={ySlider.min || 0}
             max={ySlider.max || 100}
             value={ySlider.value || 0}
-            track={ySlider.track || false}
             orientation="vertical"
             customOnChange={handleSliderYChange}
           />
@@ -164,7 +166,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
       );
     }
     // None
-    return <div />;
+    return <Box />;
   };
 
   /**
@@ -175,7 +177,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
     const { datasets } = data!;
     if (datasets.length > 1) {
       return (
-        <div>
+        <Box>
           {datasets.map((ds: ChartDataset, idx: number) => {
             // Find a color for the legend based on the dataset info
             let { color } = ChartJS.defaults;
@@ -188,7 +190,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
               <Box sx={sxClasses.checkDatasetWrapper} key={idx}>
                 <Checkbox
                   value={idx}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
                     handleDatasetChecked(idx, e.target?.checked);
                   }}
                   defaultChecked
@@ -199,16 +201,16 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
               </Box>
             );
           })}
-        </div>
+        </Box>
       );
     }
     // None
-    return <div />;
+    return <Box />;
   };
 
   /**
-   * Renders the whole Chart container JSX.Element or an empty div
-   * @returns The whole Chart container JSX.Element or an empty div
+   * Renders the whole Chart container JSX.Element or an empty box
+   * @returns The whole Chart container JSX.Element or an empty box
    */
   const renderChartContainer = (): JSX.Element => {
     if (options.geochart && data?.datasets) {
@@ -230,15 +232,15 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
       );
     }
 
-    return <div />;
+    return <Box />;
   };
 
   /**
-   * Renders the whole Chart container JSX.Element or an empty div
-   * @returns The whole Chart container JSX.Element or an empty div
+   * Renders the whole Chart container JSX.Element or an empty box
+   * @returns The whole Chart container JSX.Element or an empty box
    */
   const renderChartContainerFailed = (): JSX.Element => {
-    return <div style={{ color: 'red' }}>Error rendering the Chart. Check console for details.</div>;
+    return <Box sx={sxClasses.chartError}>Error rendering the Chart. Check console for details.</Box>;
   };
 
   //
@@ -250,7 +252,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
   let resData: ValidatorResult | undefined;
   if (options && data) {
     // Validate the data and options as received
-    const validator = new ChartValidator();
+    const validator = new SchemaValidator();
     resOptions = validator.validateOptions(options) || undefined;
     resData = validator.validateData(data);
   }
@@ -290,7 +292,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
   }
 
   // Nothing to render, no errors either
-  return <div />;
+  return <Box />;
 }
 
 /**
