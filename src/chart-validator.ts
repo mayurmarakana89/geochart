@@ -4,6 +4,7 @@ import Ajv from 'ajv';
  * Represents the result of a Chart data or options inputs validations.
  */
 export type ValidatorResult = {
+  param: string;
   valid: boolean;
   errors?: string[];
 };
@@ -145,9 +146,11 @@ export class ChartValidator {
     // Validate
     const valid = validate(data) as boolean;
     return {
+      param: 'data',
       valid,
       errors: validate.errors?.map((e: Ajv.ErrorObject) => {
-        return e.message || 'generic schema error';
+        const m = e.message || 'generic schema error';
+        return `${e.schemaPath} | ${e.keyword} | ${m}`;
       }),
     };
   };
@@ -162,10 +165,31 @@ export class ChartValidator {
     // Validate
     const valid = validate(options) as boolean;
     return {
+      param: 'options',
       valid,
       errors: validate.errors?.map((e: Ajv.ErrorObject) => {
-        return e.message || 'generic schema error';
+        const m = e.message || 'generic schema error';
+        return `${e.schemaPath} | ${e.keyword} | ${m}`;
       }),
     };
   };
+
+  public static parseValidatorResultsMessages(valRes: ValidatorResult[]) {
+    // Gather all error messages for data input
+    let msg = '';
+    valRes.forEach((v) => {
+      // Redirect
+      msg += ChartValidator.parseValidatorResultMessage(v);
+    });
+    return msg.replace(/^\n+|\n+$/gm, '');
+  }
+
+  public static parseValidatorResultMessage(valRes: ValidatorResult) {
+    // Gather all error messages for data input
+    let msg = '';
+    valRes.errors?.forEach((m: string) => {
+      msg += `${m}\n`;
+    });
+    return msg.replace(/^\n+|\n+$/gm, '');
+  }
 }

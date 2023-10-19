@@ -48,61 +48,45 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const w = window as any;
   const { cgpv } = w;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { useEffect, useState, useRef, CSSProperties } = cgpv.react;
   const { Grid, Checkbox, Slider, Typography } = cgpv.ui.elements;
-  const { style: elStyle, data, options: elOptions, action: elAction } = props;
+  const {
+    style: elStyle,
+    data,
+    options: elOptions,
+    action: elAction,
+    defaultColors,
+    handleSliderXChanged,
+    handleSliderYChanged,
+    handleError,
+  } = props;
 
   // Cast the style
   const style = elStyle as typeof CSSProperties;
 
   // Attribute the ChartJS default colors
-  if (props.defaultColors?.backgroundColor) ChartJS.defaults.backgroundColor = props.defaultColors?.backgroundColor;
-  if (props.defaultColors?.borderColor) ChartJS.defaults.borderColor = props.defaultColors?.borderColor;
-  if (props.defaultColors?.color) ChartJS.defaults.color = props.defaultColors?.color;
+  if (defaultColors?.backgroundColor) ChartJS.defaults.backgroundColor = defaultColors?.backgroundColor;
+  if (defaultColors?.borderColor) ChartJS.defaults.borderColor = defaultColors?.borderColor;
+  if (defaultColors?.color) ChartJS.defaults.color = defaultColors?.color;
 
   // Merge default options
   const options: GeoChartOptions = { ...Chart.defaultProps.options, ...elOptions } as GeoChartOptions;
-
-  // If options and data are specified
-  if (options && data) {
-    // Validate the data and options as received
-    const validator = new ChartValidator();
-    const resOptions: ValidatorResult = validator.validateOptions(options);
-    const resData: ValidatorResult = validator.validateData(data);
-
-    // If any errors
-    if (!resOptions.valid || !resData.valid) {
-      // If a callback is defined
-      if (props.handleError) props.handleError(resData, resOptions);
-      else console.error(resData, resOptions);
-    }
+  if (!options?.geochart?.chart) {
+    // Deep assign, in case geochart was specified in elOptions, but geochart wasn't (losing the default for 'chart' by accident)
+    options.geochart.chart = Chart.defaultProps.options.geochart.chart as GeoChartType;
   }
 
   // STATE / REF SECTION *******
   const [redraw, setRedraw] = useState(elAction?.shouldRedraw);
   const chartRef = useRef(null);
-  // const [selectedDatasets, setSelectedDatasets] = useState();
-
-  // If redraw is true, reset the property, set the redraw property to true for the chart, then prep a timer to reset it to false after the redraw has happened.
-  // A bit funky, but as documented online.
-  if (elAction?.shouldRedraw) {
-    elAction!.shouldRedraw = false;
-    setRedraw(true);
-    setTimeout(() => {
-      setRedraw(false);
-    }, 200);
-  }
 
   /**
    * Handles when the X Slider changes
    * @param value number | number[] Indicates the slider value
    */
   const handleSliderXChange = (value: number | number[]) => {
-    // If callback set
-    if (props.handleSliderXChanged) {
-      props.handleSliderXChanged!(value);
-    }
+    // Callback
+    handleSliderXChanged?.(value);
   };
 
   /**
@@ -110,10 +94,8 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
    * @param value number | number[] Indicates the slider value
    */
   const handleSliderYChange = (value: number | number[]) => {
-    // If callback set
-    if (props.handleSliderYChanged) {
-      props.handleSliderYChanged!(value);
-    }
+    // Callback
+    handleSliderYChanged?.(value);
   };
 
   /**
@@ -251,13 +233,73 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
     return <div />;
   };
 
-  return renderChartContainer();
+  /**
+   * Renders the whole Chart container JSX.Element or an empty div
+   * @returns The whole Chart container JSX.Element or an empty div
+   */
+  const renderChartContainerFailed = (): JSX.Element => {
+    return <div style={{ color: 'red' }}>Error rendering the Chart. Check console for details.</div>;
+  };
+
+  //
+  // PROCEED WITH LOGIC HERE!
+  //
+
+  // If options and data are specified
+  let resOptions: ValidatorResult | undefined;
+  let resData: ValidatorResult | undefined;
+  if (options && data) {
+    // Validate the data and options as received
+    const validator = new ChartValidator();
+    resOptions = validator.validateOptions(options) || undefined;
+    resData = validator.validateData(data);
+  }
+
+  // Effect hook to raise the error on the correct React state.
+  // This is because it's quite probable the handling of the error will want to modify the state of another
+  // component (e.g. Snackbar) and React will throw a warning if this is not done in the useEffect().
+  useEffect(() => {
+    // If the options or data schemas were checked and had errors
+    if (resData && resOptions && (!resData.valid || !resOptions.valid)) {
+      // If a callback is defined
+      handleError?.(resData, resOptions);
+      console.error(resData, resOptions);
+    }
+  }, [handleError, resData, resOptions]);
+
+  // If options and data are specified
+  if (options && data) {
+    // If no errors
+    if (resOptions?.valid && resData?.valid) {
+      // If redraw is true, reset the property, set the redraw property to true for the chart, then prep a timer to reset it to false after the redraw has happened.
+      // A bit funky, but as documented online.
+      if (elAction?.shouldRedraw) {
+        elAction!.shouldRedraw = false;
+        setRedraw(true);
+        setTimeout(() => {
+          setRedraw(false);
+        }, 200);
+      }
+
+      // Render the chart
+      return renderChartContainer();
+    }
+
+    // Failed to render
+    return renderChartContainerFailed();
+  }
+
+  // Nothing to render, no errors either
+  return <div />;
 }
 
 /**
  * React's default properties for the GeoChart
  */
 Chart.defaultProps = {
+  style: null,
+  defaultColors: null,
+  data: null,
   options: {
     responsive: true,
     plugins: {
@@ -269,4 +311,8 @@ Chart.defaultProps = {
       chart: 'line',
     },
   },
+  action: null,
+  handleSliderXChanged: null,
+  handleSliderYChanged: null,
+  handleError: null,
 };
