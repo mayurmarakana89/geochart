@@ -1,5 +1,5 @@
 import { Chart } from './chart';
-import { ValidatorResult } from './chart-validator';
+import { ChartValidator, ValidatorResult } from './chart-validator';
 
 /**
  * Create a container to visualize a GeoChart in a standalone manner.
@@ -38,37 +38,12 @@ export function App(): JSX.Element {
    */
   const handleError = (dataErrors: ValidatorResult, optionsErrors: ValidatorResult) => {
     // Gather all error messages
-    let msgData = '';
-    dataErrors.errors?.forEach((m: string) => {
-      msgData += `${m}\n`;
-    });
-
-    // Gather all error messages
-    let msgOptions = '';
-    optionsErrors.errors?.forEach((m: string) => {
-      msgOptions += `${m}\n`;
-    });
+    const msgAll = ChartValidator.parseValidatorResultsMessages([dataErrors, optionsErrors]);
 
     // Show the error (actually, can't because the snackbar is linked to a map at the moment and geochart is standalone)
     // TODO: Decide if we want the snackbar outside of a map or not and use showError or not
-    cgpv.api.utilities.showError('', msgData);
-    cgpv.api.utilities.showError('', msgOptions);
-    console.error(dataErrors.errors, optionsErrors.errors);
-    alert('There was an error parsing the Chart inputs. View console for details.');
-  };
-
-  /**
-   * Handles when the Chart X Axis has changed.
-   */
-  const handleChartXAxisChanged = () => {
-    console.log('Handle Chart X Axis');
-  };
-
-  /**
-   * Handles when the Chart Y Axis has changed.
-   */
-  const handleChartYAxisChanged = () => {
-    console.log('Handle Chart Y Axis');
+    cgpv.api.utilities.showError('', msgAll);
+    alert(`There was an error parsing the Chart inputs.\n\n${msgAll}\n\nView console for details.`);
   };
 
   // Effect hook to add and remove event listeners
@@ -80,16 +55,7 @@ export function App(): JSX.Element {
   });
 
   // Render the Chart
-  return (
-    <Chart
-      style={{ width: 800 }}
-      data={data}
-      options={options}
-      handleSliderXChanged={handleChartXAxisChanged}
-      handleSliderYChanged={handleChartYAxisChanged}
-      handleError={handleError}
-    />
-  );
+  return <Chart style={{ width: 800 }} data={data} options={options} handleError={handleError} />;
 }
 
 export default App;
