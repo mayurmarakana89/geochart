@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 // TODO: Remove the disable above
 import { Box } from '@mui/material';
-import { Chart as ChartJS, ChartDataset, registerables } from 'chart.js';
+import { Chart as ChartJS, ChartDataset, DefaultDataPoint, registerables } from 'chart.js';
 import { Chart as ChartReact } from 'react-chartjs-2';
 import { GeoChartOptions, GeoChartType, GeoChartData, GeoChartAction, GeoChartDefaultColors } from './chart-types';
 import { SchemaValidator, ValidatorResult } from './schema-validator';
@@ -9,10 +9,10 @@ import { SchemaValidator, ValidatorResult } from './schema-validator';
 /**
  * Main props for the Chart
  */
-export interface TypeChartChartProps<TType extends GeoChartType> {
+export interface TypeChartChartProps<TType extends GeoChartType, TData = DefaultDataPoint<GeoChartType>, TLabel = string> {
   style?: unknown; // Will be casted as CSSProperties later via the imported cgpv react
   defaultColors?: GeoChartDefaultColors;
-  data?: GeoChartData<TType>;
+  data?: GeoChartData<TType, TData, TLabel>;
   options?: GeoChartOptions;
   action?: GeoChartAction;
   handleSliderXChanged?: (value: number | number[]) => void;
@@ -178,7 +178,7 @@ export function Chart(props: TypeChartChartProps<GeoChartType>): JSX.Element {
     if (datasets.length > 1) {
       return (
         <Box>
-          {datasets.map((ds: ChartDataset, idx: number) => {
+          {datasets.map((ds: ChartDataset<GeoChartType>, idx: number) => {
             // Find a color for the legend based on the dataset info
             let { color } = ChartJS.defaults;
             if (ds.borderColor) color = ds.borderColor! as string;
