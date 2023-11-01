@@ -129,7 +129,7 @@ export function GeoChart<
   const [filteredRecords, setFilteredRecords] = useState() as [TypeJsonObject[] | undefined, React.Dispatch<TypeJsonObject[] | undefined>];
   const [xSliderMin, setXSliderMin] = useState(0) as [number, React.Dispatch<number>];
   const [xSliderMax, setXSliderMax] = useState(0) as [number, React.Dispatch<number>];
-  const [xSliderValues, setXSliderValues] = useState(0) as [number | number[] | undefined, React.Dispatch<number | number[] | undefined>];
+  const [xSliderValues, setXSliderValues] = useState(0) as [number | number[], React.Dispatch<number | number[]>];
   const [ySliderMin, setYSliderMin] = useState(0) as [number, React.Dispatch<number>];
   const [ySliderMax, setYSliderMax] = useState(0) as [number, React.Dispatch<number>];
   const [ySliderValues, setYSliderValues] = useState(0) as [number | number[], React.Dispatch<number | number[]>];
@@ -172,6 +172,56 @@ export function GeoChart<
     setChartData(parsedData);
   };
 
+  /**
+   * Filters the datasource based on 2 possible and independent axis.
+   * Ideally, we'd filter the data on the 2 independent axis individually and then grab the intersecting results,
+   * but, for performance reasons, the code cumulates the filtered data instead.
+   */
+  const calculateFiltering = (datasource: GeoChartDatasource, xValues: number | number[], yValues: number | number[]): void => {
+    // If chart type is line
+    let resItemsFinal: TypeJsonObject[] = [...datasource.items];
+    if (inputs?.chart === 'line') {
+      // If filterings on x supported
+      if (Array.isArray(xValues) && xValues.length === 2) {
+        // If filtering on time values
+        if (inputs?.geochart?.xAxis?.type === 'time') {
+          // Grab the filters
+          const theDateFrom = new Date(xValues[0]);
+          const theDateTo = new Date(xValues[1]);
+
+          // Filter the datasource.items
+          resItemsFinal = datasource.items.filter((item: TypeJsonObject) => {
+            const d = new Date(item[inputs.geochart.xAxis!.property] as string);
+            return theDateFrom <= d && d <= theDateTo;
+          });
+        } else {
+          // Default filtering on number values
+          const from = xValues[0];
+          const to = xValues[1];
+
+          // Filter the datasource.items
+          resItemsFinal = datasource.items.filter((item: TypeJsonObject) => {
+            return from <= (item[inputs.geochart.xAxis!.property] as number) && (item[inputs.geochart.xAxis!.property] as number) <= to;
+          });
+        }
+      }
+
+      // If more filterings on y, cumulate it
+      if (Array.isArray(yValues) && yValues.length === 2) {
+        const from = yValues[0];
+        const to = yValues[1];
+
+        // Filter the rest of the items using the reminding items
+        resItemsFinal = resItemsFinal.filter((item: TypeJsonObject) => {
+          return from <= (item[inputs.geochart.yAxis!.property] as number) && (item[inputs.geochart.yAxis!.property] as number) <= to;
+        });
+      }
+    }
+
+    // Set new filtered inputs
+    setFilteredRecords(resItemsFinal);
+  };
+
   /** ******************************************* CORE FUNCTIONS END **************************************************** */
   /** *************************************** EVENT HANDLERS SECTION START ********************************************** */
 
@@ -211,20 +261,8 @@ export function GeoChart<
    * @param value number | number[] Indicates the slider value
    */
   const handleSliderXChange = (newValue: number | number[]): void => {
-    // If current chart has time as x axis
-    if (inputs?.chart === 'line' && inputs?.geochart?.xAxis?.type === 'time' && Array.isArray(newValue) && newValue.length === 2) {
-      const theDateFrom = new Date(newValue[0]);
-      const theDateTo = new Date(newValue[1]);
-
-      // Filter the datasource.items using datasource.items
-      const resItems = selectedDatasource!.items.filter((item: TypeJsonObject) => {
-        const d = new Date(item[inputs.geochart.xAxis!.property] as string);
-        return theDateFrom <= d && d <= theDateTo;
-      });
-
-      // Set new filtered inputs
-      setFilteredRecords(resItems);
-    }
+    // Calculate filterings
+    calculateFiltering(selectedDatasource!, newValue, ySliderValues);
 
     // Callback
     onSliderXChanged?.(newValue);
@@ -234,9 +272,12 @@ export function GeoChart<
    * Handles when the Y Slider changes
    * @param value number | number[] Indicates the slider value
    */
-  const handleSliderYChange = (value: number | number[]): void => {
+  const handleSliderYChange = (newValue: number | number[]): void => {
+    // Calculate filterings
+    calculateFiltering(selectedDatasource!, xSliderValues, newValue);
+
     // Callback
-    onSliderYChanged?.(value);
+    onSliderYChanged?.(newValue);
   };
 
   /**
@@ -253,12 +294,21 @@ export function GeoChart<
     return value.toString();
   };
 
+  /**
+   * Handles the display of the label on the Y Slider
+   * @param value number | number[] Indicates the slider value
+   */
+  const handleSliderYValueDisplay = (value: number): string => {
+    // Default
+    return value.toString();
+  };
+
   /** **************************************** EVENT HANDLERS SECTION END *********************************************** */
   /** ***************************************** USE EFFECT SECTION START ************************************************ */
 
   // Effect hook when the inputs change - coming from the parent component.
   useEffect(() => {
-    console.log('USE EFFECT PARENT INPUTS', parentInputs);
+    // console.log('USE EFFECT PARENT INPUTS', parentInputs);
 
     // Refresh the inputs in this component
     setInputs(parentInputs);
@@ -272,7 +322,7 @@ export function GeoChart<
 
   // Effect hook when the inputs change - coming from this component.
   useEffect(() => {
-    console.log('USE EFFECT INPUTS', inputs);
+    // console.log('USE EFFECT INPUTS', inputs);
 
     // If inputs is specified
     if (inputs) {
@@ -283,7 +333,7 @@ export function GeoChart<
 
   // Effect hook when the feature change - coming from this component.
   useEffect(() => {
-    console.log('USE EFFECT SELECTED DATASOURCE', selectedDatasource);
+    // console.log('USE EFFECT SELECTED DATASOURCE', selectedDatasource);
 
     // Clear any record filters
     setFilteredRecords(undefined);
@@ -434,11 +484,19 @@ export function GeoChart<
   const renderYSlider = (): JSX.Element => {
     // If inputs
     if (inputs && selectedDatasource) {
-      if (inputs.geochart.ySlider?.display) {
+      if (inputs.chart === 'line' && inputs.geochart.ySlider?.display) {
         // Need 100% height to occupy some space, otherwise it's crunched.
         return (
           <Box sx={{ height: '100%' }}>
-            <Slider min={ySliderMin} max={ySliderMax} value={ySliderValues} orientation="vertical" customOnChange={handleSliderYChange} />
+            <Slider
+              min={ySliderMin}
+              max={ySliderMax}
+              value={ySliderValues}
+              orientation="vertical"
+              customOnChange={handleSliderYChange}
+              onValueDisplay={handleSliderYValueDisplay}
+              onValueDisplayAriaLabel={handleSliderYValueDisplay}
+            />
           </Box>
         );
       }
