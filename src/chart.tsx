@@ -264,6 +264,9 @@ export function GeoChart<
     // Calculate filterings
     calculateFiltering(selectedDatasource!, newValue, ySliderValues);
 
+    // Set the X State
+    setXSliderValues(newValue);
+
     // Callback
     onSliderXChanged?.(newValue);
   };
@@ -275,6 +278,9 @@ export function GeoChart<
   const handleSliderYChange = (newValue: number | number[]): void => {
     // Calculate filterings
     calculateFiltering(selectedDatasource!, xSliderValues, newValue);
+
+    // Set the Y State
+    setYSliderValues(newValue);
 
     // Callback
     onSliderYChanged?.(newValue);
