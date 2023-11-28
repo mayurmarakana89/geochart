@@ -49,8 +49,7 @@
                           "type": "string"
                         },
                         {
-                          "type": "object",
-                          "format": "date-time"
+                          "type": "object"
                         }
                       ]
                     },
@@ -103,8 +102,10 @@
             "type": "integer"
           },
           "stepped": {
-            "type": ["string", "boolean"],
-            "enum": ["before", "after", "middle", false],
+            "anyOf": [
+              { "type": "string", "enum": ["before", "after", "middle"] },
+              { "type": "boolean" }
+            ],
             "default": false
           }
         },
