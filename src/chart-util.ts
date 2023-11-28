@@ -14,8 +14,9 @@ export const isNumber = (val: unknown): boolean => {
  * @param index number The index we should find a color for
  * @returns string The color at the specified index location in the palette
  */
-export const getColorFromPalette = (colorPalette: string[], index: number): string => {
-  return colorPalette[index % colorPalette.length];
+export const getColorFromPalette = (colorPalette: string[] | undefined, index: number): string | undefined => {
+  if (colorPalette) return colorPalette[index % colorPalette.length];
+  return undefined;
 };
 
 /**
@@ -73,4 +74,17 @@ export const extractColor = (color: string): string => {
 
   // As-is
   return color;
+};
+
+/**
+ * Downloads the data object as a JSON file on the client.
+ */
+export const downloadJson = (data: unknown, filename: string): void => {
+  const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute('href', dataStr);
+  downloadAnchorNode.setAttribute('download', filename);
+  document.body.appendChild(downloadAnchorNode); // required for firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
 };

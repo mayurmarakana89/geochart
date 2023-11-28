@@ -19,6 +19,17 @@ export const sxClasses = {
     padding: '10px',
     fontSize: 'larger',
   },
+  xAxisLabel: {
+    textAlign: 'center',
+    margin: '10px 0px',
+  },
+  yAxisLabel: {
+    position: 'relative',
+    margin: '0 10px',
+    writingMode: 'vertical-rl',
+    transform: 'rotate(-180deg)',
+    transformOrigin: 'bottom center',
+  },
   uiOptions: {
     position: 'absolute',
     right: '0px',
@@ -27,6 +38,10 @@ export const sxClasses = {
   },
   uiOptionsStepsSelector: {
     minWidth: '100px',
+  },
+  uiOptionsResetStates: {
+    display: 'inline-flex',
+    width: '40px',
   },
   checkDatasetWrapperLabel: {
     display: 'inline-block',

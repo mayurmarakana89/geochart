@@ -5,6 +5,9 @@ import {
   GeoDefaultDataPoint,
   TypeJsonObject,
   GeoChartCategoriesGroup,
+  GeoChartQuery,
+  GeoChartQueryOptionClause,
+  StepsPossibilities,
   DEFAULT_COLOR_PALETTE_CUSTOM_TRANSPARENT,
   DEFAULT_COLOR_PALETTE_CUSTOM_OPAQUE,
   DEFAULT_COLOR_PALETTE_CUSTOM_ALT_TRANSPARENT,
@@ -41,6 +44,254 @@ function sortOnX<TType extends ChartType, TData = GeoDefaultDataPoint<TType>>(da
     ds.data = dataOrdered as TData;
   });
 }
+
+/**
+ * Sorts all ChartDatasets in the given ChartData based on their label values.
+ * @param data ChartData<TType, TData, TLabel> the data holding the datasets to be sorted.
+ */
+function sortOnDatasetLabels<TType extends ChartType, TData = GeoDefaultDataPoint<TType>, TLabel = string>(
+  data: ChartData<TType, TData, TLabel>
+): void {
+  // For each dataset
+  const datasetsOrdered = data.datasets.sort((a: ChartDataset<TType, TData>, b: ChartDataset<TType, TData>) => {
+    if (a.label && b.label) return (a.label as string).localeCompare(b.label as string);
+    return 0;
+  });
+
+  // Replace
+  // eslint-disable-next-line no-param-reassign
+  data.datasets = datasetsOrdered;
+}
+
+/**
+ * Sets the colors using the palette.
+ * @param chartConfig GeoChartConfig<TType> The GeoChart configuration
+ */
+function setColorsUsingPalette<TType extends ChartType, TData = GeoDefaultDataPoint<TType>, TLabel = string>(
+  chartConfig: GeoChartConfig<TType>,
+  data: ChartData<TType, TData, TLabel>
+): void {
+  // If pie or doughnut
+  let colorPaletteForAll: string[];
+  if (chartConfig.chart === 'pie' || chartConfig.chart === 'doughnut') {
+    // Create a new color array of expected length
+    colorPaletteForAll = Array.from({ length: data.labels!.length }, (_, paletteIndex: number) => {
+      return getColorFromPalette(chartConfig.geochart.xAxis!.paletteBackgrounds, paletteIndex)!;
+    });
+  }
+
+  // For each dataset
+  data.datasets.forEach((ds: ChartDataset<TType, TData>, idx: number) => {
+    // If we categorize
+    let backgroundColor: string | string[] | undefined;
+    let borderColor: string | string[] | undefined;
+    if (chartConfig.category?.property) {
+      // If pie or doughnut
+      if (chartConfig.chart === 'pie' || chartConfig.chart === 'doughnut') {
+        backgroundColor = colorPaletteForAll;
+      } else {
+        // The colors to use
+        backgroundColor = getColorFromPalette(chartConfig.category!.paletteBackgrounds, idx);
+      }
+      borderColor = getColorFromPalette(chartConfig.category!.paletteBorders, idx);
+    } else {
+      // Not categorizing
+      // If pie or doughnut
+      // eslint-disable-next-line no-lonely-if
+      if (chartConfig.chart === 'pie' || chartConfig.chart === 'doughnut') {
+        backgroundColor = colorPaletteForAll;
+        borderColor = undefined;
+      } else {
+        // The colors to use
+        backgroundColor = getColorFromPalette(chartConfig.geochart.xAxis!.paletteBackgrounds, idx);
+        borderColor = getColorFromPalette(chartConfig.geochart.xAxis!.paletteBorders, idx);
+      }
+    }
+
+    // Set the colors
+    // eslint-disable-next-line no-param-reassign
+    if (backgroundColor) ds.backgroundColor = backgroundColor;
+    // eslint-disable-next-line no-param-reassign
+    if (borderColor) ds.borderColor = borderColor;
+  });
+}
+
+/**
+ * Builds a where clause string, to be used in an url, given the array of GeoChartQueryOptionClause.
+ * @param whereClauses GeoChartQueryOptionClause[] The array of where clauses objects.
+ * @param source TypeJsonObject The source to read the information from when building the clause.
+ * @returns string Returns the where clause string
+ */
+const buildQueryWhereClause = (whereClauses: GeoChartQueryOptionClause[], source: TypeJsonObject): string => {
+  // Loop on each url options
+  let theWhereClause = '';
+  if (whereClauses) {
+    whereClauses.forEach((urlOpt: GeoChartQueryOptionClause) => {
+      // Read the value we want
+      let val;
+      if (urlOpt.valueIs) {
+        // As-is replace
+        val = urlOpt.valueIs;
+      } else if (urlOpt.valueFrom) {
+        // Value comes from the record object
+        val = source[urlOpt.valueFrom] as string;
+      }
+      // If value was read, concatenate to the where clause
+      if (val) {
+        val = `${urlOpt.prefix || ''}${val}${urlOpt.suffix || ''}`;
+        val = encodeURIComponent(val);
+        theWhereClause += `${urlOpt.field}=${val} AND `;
+      }
+    });
+    theWhereClause = theWhereClause.replace(/ AND $/, '');
+  }
+
+  // Return the where clause
+  return theWhereClause;
+};
+
+/**
+ * Transforms the query results of an Esri features service response.
+ * The transformation reads the Esri formatted information and return a list of `TypeJsonObject` records.
+ * @param results TypeJsonObject The Json Object representing the data from Esri.
+ * @returns TypeJsonObject[] an array of relared records of type TypeJsonObject
+ */
+export function parseFeatureInfoEsriEntries(records: TypeJsonObject[]): TypeJsonObject[] {
+  // Loop on the Esri results
+  return records.map((rec: TypeJsonObject) => {
+    // Prep the TypeJsonObject
+    const featInfo: TypeJsonObject = {};
+
+    // Loop on the object attributes
+    Object.entries(rec.attributes).forEach((tupleAttrValue: [string, TypeJsonObject]) => {
+      // eslint-disable-next-line prefer-destructuring
+      featInfo[tupleAttrValue[0]] = tupleAttrValue[1];
+    });
+
+    // Return the TypeJsonObject
+    return featInfo;
+  });
+}
+
+/**
+ * Transforms the query results of an OGC API features service response.
+ * The transformation reads the GeoJson formatted information and return a list of `TypeJsonObject` records.
+ * @param results TypeJsonObject The Json Object representing the data from Esri.
+ * @returns TypeJsonObject[] an array of relared records of type TypeJsonObject
+ */
+export function parseFeatureInfoOGCEntries(records: TypeJsonObject[]): TypeJsonObject[] {
+  // Loop on the Esri results
+  return records.map((rec: TypeJsonObject) => {
+    // Prep the TypeJsonObject
+    const featInfo: TypeJsonObject = {};
+
+    // Loop on the object properties
+    Object.entries(rec.properties).forEach((tupleAttrValue: [string, TypeJsonObject]) => {
+      // eslint-disable-next-line prefer-destructuring
+      featInfo[tupleAttrValue[0]] = tupleAttrValue[1];
+    });
+
+    // Return the TypeJsonObject
+    return featInfo;
+  });
+}
+
+/**
+ * Asynchronously queries an Esri Features endpoint given the url and returns an array of `TypeJsonObject` records.
+ * @param url string An Esri Features url indicating a feature layer to query
+ * @returns TypeJsonObject[] An array of relared records of type TypeJsonObject, or an empty array.
+ */
+export async function queryEsriFeaturesByUrl(url: string): Promise<TypeJsonObject[]> {
+  // Query the data
+  const response = await fetch(url);
+  const respJson = await response.json();
+
+  // Return the array of TypeJsonObject
+  return parseFeatureInfoEsriEntries(respJson.features);
+}
+
+/**
+ * Asynchronously queries an OGC API Features endpoint given the url and returns an array of `TypeJsonObject` records.
+ * @param url string An OGC API Features url indicating a feature layer to query
+ * @returns TypeJsonObject[] An array of relared records of type TypeJsonObject, or an empty array.
+ */
+export async function queryOGCFeaturesByUrl(url: string): Promise<TypeJsonObject[]> {
+  // Query the data
+  const response = await fetch(url);
+  const respJson = await response.json();
+
+  // Return the array of TypeJsonObject
+  return parseFeatureInfoOGCEntries(respJson.features);
+}
+
+/**
+ * Fetches the items that should be attached to the given Datasource.
+ * @param layerConfig GeoViewGeoChartConfigLayer The layer configuration we're currently using.
+ * @param sourceItem TypeJsonObject The source item to grab items form
+ * @returns TypeJsonObject[] Returns the items that should be attached to the Datasource
+ */
+export const fetchItemsViaQueryForDatasource = async (
+  queryConfig: GeoChartQuery,
+  sourceItem: TypeJsonObject,
+  language: string
+): Promise<TypeJsonObject[]> => {
+  // Depending on the type of query
+  let entries: TypeJsonObject[];
+  if (queryConfig.type === 'ogcAPIFeatures') {
+    // Base query url
+    let { url } = queryConfig;
+
+    // Append the mandatory params
+    url += `/items?f=json&lang=${language}&skipGeometry=true&offset=0`;
+
+    // If any query options
+    if (queryConfig.queryOptions) {
+      // NOTE: The filter clause is only supported in Part 3 of the OGC Features API doc. For some services, this might not work.
+      // The options
+      const urlOptions = queryConfig.queryOptions;
+
+      // Build the where clause of the url
+      url += `&filter=${buildQueryWhereClause(urlOptions.whereClauses, sourceItem)}`;
+    }
+
+    // Query an OGC Features endpoint
+    entries = await queryOGCFeaturesByUrl(url);
+  } else if (queryConfig.type === 'esriRegular') {
+    // Base query url
+    let { url } = queryConfig;
+
+    // Append the mandatory params
+    url += '/query?outFields=*&f=json';
+
+    // If any query options
+    if (queryConfig.queryOptions) {
+      // The options
+      const urlOptions = queryConfig.queryOptions;
+
+      // Build the where clause of the url
+      url += `&where=${buildQueryWhereClause(urlOptions.whereClauses, sourceItem)}`;
+
+      // Build the order by clause of the url
+      url += `&orderByFields=${urlOptions.orderByField}`;
+    }
+
+    // Query an Esri layer/table regular method
+    entries = await queryEsriFeaturesByUrl(url);
+  } else if (queryConfig.type === 'json') {
+    // Base query url
+    const { url } = queryConfig;
+
+    // Query an Esri layer/table regular method
+    entries = await queryOGCFeaturesByUrl(url);
+
+    // TODO: Do something with the payload if we want to be fancy about it like filtering client side and stuff
+  } else {
+    throw Error('Unsupported query type to fetch the Datasource items.');
+  }
+
+  // Simplify for the GeoChart
+  return entries;
+};
 
 /**
  * Creates a GeoChartXYData data value by reading attributes from a TypeJsonObject.
@@ -119,8 +370,7 @@ function createDataCompressedForPieDoughnut<
  */
 function createDataset<TType extends ChartType, TData extends GeoDefaultDataPoint<TType> = GeoDefaultDataPoint<TType>>(
   chartConfig: GeoChartConfig<TType>,
-  backgroundColor: string | string[] | undefined,
-  borderColor: string | string[] | undefined,
+  steps: StepsPossibilities | undefined,
   label?: string
 ): ChartDataset<TType, TData> {
   // Transform the TypeFeatureJson data to ChartDataset<TType, TData>
@@ -135,7 +385,7 @@ function createDataset<TType extends ChartType, TData extends GeoDefaultDataPoin
     };
 
     // If useSteps is defined, set it for each dataset
-    if (chartConfig.geochart.useSteps) theDatasetLine.stepped = chartConfig.geochart.useSteps;
+    if (steps !== undefined) theDatasetLine.stepped = steps;
 
     // If tension is defined, set it for each dataset
     if (chartConfig.geochart.tension) theDatasetLine.tension = chartConfig.geochart.tension;
@@ -149,10 +399,6 @@ function createDataset<TType extends ChartType, TData extends GeoDefaultDataPoin
       data: [],
     } as unknown as ChartDataset<TType, TData>;
   }
-
-  // Set the colors
-  if (backgroundColor) theDatasetGeneric.backgroundColor = backgroundColor;
-  if (borderColor) theDatasetGeneric.borderColor = borderColor;
 
   // If the border width is set (applies to all datasets the same)
   if (chartConfig.geochart.borderWidth) {
@@ -173,7 +419,7 @@ function createDatasetsLineBar<
   TType extends ChartType = 'line' | 'bar',
   TData extends GeoDefaultDataPoint<TType> = GeoDefaultDataPoint<TType>,
   TLabel extends string = string
->(chartConfig: GeoChartConfig<TType>, records: TypeJsonObject[]): ChartData<TType, TData, TLabel> {
+>(chartConfig: GeoChartConfig<TType>, steps: StepsPossibilities, records: TypeJsonObject[]): ChartData<TType, TData, TLabel> {
   // Transform the TypeFeatureJson data to ChartData<TType, TData, string>
   const returnedChartData: ChartData<TType, TData, TLabel> = {
     labels: [],
@@ -191,12 +437,8 @@ function createDatasetsLineBar<
 
       // If new category
       if (!Object.keys(categoriesRead).includes(catName)) {
-        // The colors to use
-        const backgroundColor = getColorFromPalette(chartConfig.category!.paletteBackgrounds!, idx);
-        const borderColor = getColorFromPalette(chartConfig.category!.paletteBorders!, idx);
-
         // Create dataset
-        const newDataset = createDataset<TType, TData>(chartConfig, backgroundColor, borderColor, catName);
+        const newDataset = createDataset<TType, TData>(chartConfig, steps, catName);
         categoriesRead[catName] = { index: idx++, data: newDataset.data };
         returnedChartData.datasets.push(newDataset);
       }
@@ -209,12 +451,8 @@ function createDatasetsLineBar<
     });
   } else {
     // 1 feature = 1 dataset
-    // The colors to use
-    const backgroundColor = getColorFromPalette(chartConfig.geochart.xAxis!.paletteBackgrounds!, 0);
-    const borderColor = getColorFromPalette(chartConfig.geochart.xAxis!.paletteBorders!, 0);
-
     // Create dataset
-    const newDataset = createDataset<TType, TData>(chartConfig, backgroundColor, borderColor, undefined);
+    const newDataset = createDataset<TType, TData>(chartConfig, steps, undefined);
     returnedChartData.datasets.push(newDataset);
 
     // For each record
@@ -255,11 +493,6 @@ function createDatasetsPieDoughnut<
     if (!returnedChartData.labels!.includes(valX)) returnedChartData.labels!.push(valX);
   });
 
-  // Create a new color array of expected length
-  const colorPaletteForAll: string[] = Array.from({ length: returnedChartData.labels!.length }, (_, paletteIndex: number) => {
-    return getColorFromPalette(chartConfig.geochart.xAxis!.paletteBackgrounds, paletteIndex);
-  });
-
   // If we categorize
   if (chartConfig.category?.property) {
     // 1 category = 1 dataset
@@ -271,12 +504,8 @@ function createDatasetsPieDoughnut<
 
       // If new category
       if (!Object.keys(categoriesRead).includes(catName)) {
-        // The colors to use
-        let borderColor;
-        if (chartConfig.category!.paletteBorders) borderColor = getColorFromPalette(chartConfig.category!.paletteBorders!, idx);
-
         // Create dataset
-        const newDataset = createDataset<TType, TData>(chartConfig, colorPaletteForAll, borderColor, catName);
+        const newDataset = createDataset<TType, TData>(chartConfig, undefined, catName);
         categoriesRead[catName] = { index: idx++, data: newDataset.data };
         returnedChartData.datasets.push(newDataset);
       }
@@ -295,7 +524,7 @@ function createDatasetsPieDoughnut<
   } else {
     // 1 feature = 1 dataset
     // Create dataset
-    const newDataset = createDataset<TType, TData>(chartConfig, colorPaletteForAll, undefined, undefined);
+    const newDataset = createDataset<TType, TData>(chartConfig, undefined, undefined);
     returnedChartData.datasets.push(newDataset);
 
     // Compress the data for the ChartDataset
@@ -321,10 +550,10 @@ function createDatasets<
   TType extends ChartType = ChartType,
   TData extends GeoDefaultDataPoint<TType> = GeoDefaultDataPoint<TType>,
   TLabel extends string = string
->(chartConfig: GeoChartConfig<TType>, records: TypeJsonObject[]): ChartData<TType, TData, TLabel> {
+>(chartConfig: GeoChartConfig<TType>, steps: StepsPossibilities, records: TypeJsonObject[]): ChartData<TType, TData, TLabel> {
   // Depending on the ChartType
   if (chartConfig.chart === 'line' || chartConfig.chart === 'bar') {
-    return createDatasetsLineBar(chartConfig, records);
+    return createDatasetsLineBar(chartConfig, steps, records);
   }
   if (chartConfig.chart === 'pie' || chartConfig.chart === 'doughnut') {
     return createDatasetsPieDoughnut(chartConfig, records);
@@ -454,6 +683,18 @@ export function createChartJSOptions<TType extends ChartType>(
     };
   }
 
+  // If there's a custom suffix for the tooltip for the values
+  if (chartConfig.geochart.yAxis.tooltipSuffix) {
+    const optionsLine = options as ChartOptions<'line' | 'bar'>;
+    // Drill
+    optionsLine.plugins = optionsLine.plugins || {};
+    optionsLine.plugins.tooltip = optionsLine.plugins.tooltip || {};
+    optionsLine.plugins.tooltip.callbacks = optionsLine.plugins.tooltip.callbacks || {};
+    optionsLine.plugins.tooltip.callbacks.label = (context): string => {
+      return `${context.formattedValue} ${chartConfig.geochart.yAxis.tooltipSuffix}`;
+    };
+  }
+
   // Return the ChartJS Options
   return options;
 }
@@ -472,14 +713,21 @@ export function createChartJSData<
   TLabel extends string = string
 >(
   chartConfig: GeoChartConfig<TType>,
+  steps: StepsPossibilities,
   records: TypeJsonObject[] | undefined,
   defaultData: ChartData<TType, TData, TLabel>
 ): ChartData<TType, TData, TLabel> {
   // If there's a data source, parse it to a GeoChart data
   let data: ChartData<TType, TData, TLabel> = { ...defaultData };
   if (records && records.length > 0) {
-    data = createDatasets(chartConfig, records);
+    data = createDatasets(chartConfig, steps, records);
   }
+
+  // Sort the dataset labels
+  sortOnDatasetLabels(data);
+
+  // Now that the datasets are ordered, set the color palette for them
+  setColorsUsingPalette(chartConfig, data);
 
   // If the x axis type is time
   if (chartConfig.geochart.xAxis?.type === 'time' || chartConfig.geochart.xAxis?.type === 'timeseries') {

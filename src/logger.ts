@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 
-// Indicates logging level. The higher the number, the more detailed the log.
-const LOGGING_LEVEL: number = 3;
-
 // Some arbitrary log levels.
 export const LOG_LEVEL_MAXIMUM = 10;
 export const LOG_LEVEL_HIGH = 8;
 export const LOG_LEVEL_MEDIUM = 5;
 export const LOG_LEVEL_LOW = 3;
 export const LOG_LEVEL_MINIMAL = 1;
+
+// Indicates logging level. The higher the number, the more detailed the log.
+const LOGGING_LEVEL: number = LOG_LEVEL_LOW;
 
 /**
  * Checks if the web application is running localhost

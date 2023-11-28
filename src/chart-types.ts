@@ -23,10 +23,41 @@ export type GeoChartConfig<TType extends ChartType> = GeoChartOptions<TType> & {
 export type GeoChartOptions<TType extends ChartType> = {
   chart: TType;
   title: string;
-  category?: GeoChartCategory;
-  datasources: GeoChartDatasource[];
+  query?: GeoChartQuery;
   geochart: GeoChartOptionsGeochart;
+  category?: GeoChartCategory;
   ui?: GeoChartOptionsUI;
+  datasources: GeoChartDatasource[];
+};
+
+/**
+ * Definition of query parameters used to fetch further information to build the Datasources
+ */
+export const GeoChartQueryTypesConst = ['esriRegular', 'ogcAPIFeatures', 'json'] as const;
+export type GeoChartQueryTypes = (typeof GeoChartQueryTypesConst)[number];
+export type GeoChartQuery = {
+  type: GeoChartQueryTypes;
+  url: string;
+  queryOptions?: GeoChartQueryOption;
+};
+
+/**
+ * The Options to query a layer
+ */
+export type GeoChartQueryOption = {
+  whereClauses: GeoChartQueryOptionClause[];
+  orderByField?: string;
+};
+
+/**
+ * The Options to create a where clause to query a layer
+ */
+export type GeoChartQueryOptionClause = {
+  field: string;
+  valueFrom?: string;
+  valueIs?: string;
+  prefix?: string;
+  suffix?: string;
 };
 
 /**
@@ -51,20 +82,23 @@ export type StepsPossibilities = (typeof StepsPossibilitiesConst)[number];
  * The Configuration about using GeoChart specific parameters.
  */
 export type GeoChartOptionsGeochart = {
+  xAxis: GeoChartOptionsAxis;
+  yAxis: GeoChartOptionsAxis;
   borderWidth?: number;
   useSteps?: StepsPossibilities;
   tension?: number;
-  xAxis?: GeoChartOptionsAxis;
-  yAxis?: GeoChartOptionsAxis;
-  xSlider?: GeoChartOptionsSlider;
-  ySlider?: GeoChartOptionsSlider;
 };
 
 /**
  * The Configuration about using UI specific parameters.
  */
 export type GeoChartOptionsUI = {
+  xSlider?: GeoChartOptionsSlider;
+  ySlider?: GeoChartOptionsSlider;
   stepsSwitcher?: boolean;
+  resetStates?: boolean;
+  description?: string;
+  download?: boolean;
 };
 
 /**
@@ -73,7 +107,7 @@ export type GeoChartOptionsUI = {
 export type GeoChartDatasource = {
   value?: string;
   display: string;
-  sourceItem?: unknown; // Associated source item, mainly useful for lazing loading
+  sourceItem: TypeJsonObject; // Associated source item linking back to the source of the data
   items?: TypeJsonObject[];
 };
 
@@ -107,6 +141,8 @@ export type GeoChartDefaultColors = {
 export type GeoChartOptionsAxis = {
   type: 'linear' | 'logarithmic' | 'category' | 'time' | 'timeseries' | undefined;
   property: string;
+  label: string;
+  tooltipSuffix: string;
   usePalette?: boolean;
   paletteBackgrounds: string[];
   paletteBorders: string[];
@@ -146,6 +182,13 @@ export type GeoDefaultDataPoint<TType extends ChartType> = DistributiveArray<Cha
  */
 export type GeoChartAction = {
   shouldRedraw?: boolean;
+};
+
+/**
+ * Helper type to work with the Selected Datasets state.
+ */
+export type GeoChartSelectedDatasets = {
+  [label: string]: boolean;
 };
 
 /**
