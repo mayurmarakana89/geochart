@@ -139,13 +139,13 @@ export type GeoChartDefaultColors = {
  * Options for the Slider Axis component
  */
 export type GeoChartOptionsAxis = {
-  type: 'linear' | 'logarithmic' | 'category' | 'time' | 'timeseries' | undefined;
   property: string;
-  label: string;
-  tooltipSuffix: string;
+  type?: 'linear' | 'logarithmic' | 'category' | 'time' | 'timeseries';
+  label?: string;
   usePalette?: boolean;
-  paletteBackgrounds: string[];
-  paletteBorders: string[];
+  paletteBackgrounds?: string[];
+  paletteBorders?: string[];
+  tooltipSuffix?: string;
 };
 
 /**
