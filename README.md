@@ -140,12 +140,13 @@ There are 3 essential props for this component: inputs, data and options.
 - ui.ySlider?: groups information on the y slider;
 - ui.ySlider.display?: indicates if the slider should be displayed;
 - ui.ySlider.steps?: indicates the steps the slider should jump when sliding;
-- ui.stepsSwitcher: indicates if the select drop down to switch the steps on-the-fly is displayed;
-- ui.resetStates: indicates if the button to reset the states is displayed;
-- ui.description: indicates the description text to show at the bottom of the chart;
-- ui.download: indicates if a download button should be displayed;
+- ui.stepsSwitcher?: indicates if the select drop down to switch the steps on-the-fly is displayed;
+- ui.resetStates?: indicates if the button to reset the states is displayed;
+- ui.description?: indicates the description text to show at the bottom of the chart;
+- ui.download?: indicates if a download button should be displayed;
 - datasources: groups information on the datasources to build the datasource drop down and the chart;
 - datasources.display: indicates the string to be displayed in the drop down;
+- datasources.value: indicates the inner value used for the `sourceItem`;
 - datasources.sourceItem: indicates the source item used as reference to query the data from. This property has an object with a property that should equal the property in `query.queryOptions.whereClauses.valueFrom`;
 - datasources.items?: indicates the actual `items`, associated with the `datasources.sourceItem`, used to build the chart with. When `items` is specified, the data isn't fetched with the `query.url`;
 - chartjsOptions?: indicates further `ChartJS specific` `options` to open the door to further customization when natively supported by `ChartJS` (ref: [here](https://www.chartjs.org/docs/latest/general/options.html));
