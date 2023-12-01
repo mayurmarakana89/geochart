@@ -122,7 +122,7 @@ There are 3 essential props for this component: inputs, data and options.
 - geochart.borderWidth?: indicates the thickness of the borders (or lines in the `line` chart);
 - geochart.useSteps?: indicates if the line chart should use steps - supported values are: `'before'`, `'middle'`, `'after'`, `false`;
 - geochart.tension?: indicates if the line chart should use tension when drawing the line between the values;
-- geochart.xAxis: indicates information on the x axis;
+- geochart.xAxis: groups information on the x axis;
 - geochart.xAxis.property: indicates the property name on which to read the information from the table source;
 - geochart.xAxis.label?: indicates the name of the axis to be displayed under the line chart;
 - geochart.xAxis.type?: indicates the type of the x axis - supported values are:  `'linear'`, `'time'`, `'timeseries'`, `'logarithmic'`, `'category'`;
@@ -130,7 +130,7 @@ There are 3 essential props for this component: inputs, data and options.
 - geochart.xAxis.paletteBackgrounds?: indicates the array of rgba color values to use as the palette for background coloring;
 - geochart.xAxis.paletteBorders?: indicates the array of rgb color values to use as the palette for border coloring;
 - geochart.xAxis.tooltipSuffix?: indicates the suffix to use on for the values when displayed in the tooltip;
-- geochart.yAxis: indicates information on the y axis;
+- geochart.yAxis: groups information on the y axis;
 - geochart.yAxis.property: indicates the property name on which to read the information from the table source;
 - geochart.yAxis.label?: indicates the name of the axis to be displayed under the line chart;
 - geochart.yAxis.type?: indicates the type of the y axis - supported values are:  `'linear'`, `'time'`, `'timeseries'`, `'logarithmic'`, `'category'`;
