@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { GeoChart } from './chart';
 import { GeoChartConfig, ChartType, ChartOptions, ChartData, GeoChartAction, DefaultDataPoint } from './chart-types';
 import { SchemaValidator } from './chart-schema-validator';
@@ -20,7 +21,7 @@ export function App(props: TypeAppProps): JSX.Element {
   const w = window as any;
   // Fetch the cgpv module
   const { cgpv } = w;
-  const { react, ui, useTranslation } = cgpv;
+  const { react, ui } = cgpv;
   const { useEffect, useState, useCallback } = react;
   const { Box } = ui.elements;
   const { schemaValidator } = props;
