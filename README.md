@@ -110,7 +110,7 @@ There are 3 essential props for this component: inputs, data and options.
 - query: groups information on how the data should be queried in the table source;
 - query.type?: indicates the kind of query to perform - supported values are: `'esriRegular'`, `'ogcAPIFeatures'` and `'json'`;
 - query.url?: indicates the url where to fetch the data to build the chart with - supported urls are Esri services, OGC API Features services or urls pointing to a .json file built on the GeoJson format;
-- query.queryOptions.whereClauses?: indicates how to generate the where clause to fetch the correct data in the table source. This is an array to support filtering on more than 1 field. The `and` operator is implicit;
+- query.queryOptions.whereClauses?: indicates how to generate the where clause to fetch the correct data in the table source. This is an array to support filtering on more than 1 field. The `and` logic operator is implicit;
 - query.queryOptions.whereClauses.field: indicates the field name, in the table source, on which to filter;
 - query.queryOptions.whereClauses.prefix/suffix: indicates the prefix/suffix to use to build the query (useful to support single-quotes when the attribute to query is a string);
 - query.queryOptions.whereClauses.valueIs: indicates the value as a literal information (not read from a property name from the datasource);
@@ -132,7 +132,7 @@ There are 3 essential props for this component: inputs, data and options.
 - geochart.xAxis.tooltipSuffix?: indicates the suffix to use on for the values when displayed in the tooltip;
 - geochart.yAxis: groups information on the y axis;
 - geochart.yAxis.property: indicates the property name on which to read the information from the table source;
-- geochart.yAxis.label?: indicates the name of the axis to be displayed under the line chart;
+- geochart.yAxis.label?: indicates the name of the axis to be displayed vertically on the side of the line chart;
 - geochart.yAxis.type?: indicates the type of the y axis - supported values are:  `'linear'`, `'time'`, `'timeseries'`, `'logarithmic'`, `'category'`;
 - geochart.yAxis.usePalette?: indicates if a pre-determined (GeoChart specific) color palette should be used;
 - geochart.yAxis.paletteBackgrounds?: indicates the array of rgba color values to use as the palette for background coloring;
@@ -164,8 +164,8 @@ There are 3 essential props for this component: inputs, data and options.
 - datasources: groups information on the datasources to build the datasource drop down and the chart;
 - datasources.display: indicates the string to be displayed in the drop down;
 - datasources.value: indicates the inner value used for the `sourceItem`;
-- datasources.sourceItem: indicates the source item used as reference to query the data from. This property has an object with a property that should equal the property in `query.queryOptions.whereClauses.valueFrom`;
-- datasources.items?: indicates the actual `items`, associated with the `datasources.sourceItem`, used to build the chart with. When `items` is specified, the data isn't fetched with the `query.url`;
+- datasources.sourceItem: ***{tricky one}*** indicates the source item used as reference to query the data from. This property has an object with a property that should equal the property in `query.queryOptions.whereClauses.valueFrom`;
+- datasources.items?: indicates the actual `items` (coming from the table source), associated with the `datasources.sourceItem` (coming from the origin source), used to build the chart with. When `items` is already specified/populated, the data isn't fetched via the `query.url`;
 
 #### chartjsOptions property
 - chartjsOptions?: indicates further `ChartJS specific` `options` to open the door to further customization when natively supported by `ChartJS` (ref: [here](https://www.chartjs.org/docs/latest/general/options.html));
