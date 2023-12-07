@@ -29,6 +29,9 @@ There are 3 essential props for this component: inputs, data and options.
 - `data` is the equivalent of the ChartJS `data` props, to bypass the `inputs` and play with ChartJS directly;
 - `options` is the equivalent of the ChartJS `options` props, to bypass the `inputs` props and play with ChartJS directly;
  
+### Information on 'inputs' configuration
+To read details on the schame of an `inputs` configuration json, see: [https://github.com/Canadian-Geospatial-Platform/geochart/blob/develop/schema-inputs.json](https://github.com/Canadian-Geospatial-Platform/geochart/blob/develop/schema-inputs.json)
+
 ### Example of an 'inputs` configuration:
 ```
 {
@@ -102,9 +105,6 @@ There are 3 essential props for this component: inputs, data and options.
     }
   }
 ```
-
-### Information on 'inputs' configuration
-To read details on the schame of an `inputs` configuration json, see: [https://github.com/Canadian-Geospatial-Platform/geochart/blob/develop/schema-inputs.json](https://github.com/Canadian-Geospatial-Platform/geochart/blob/develop/schema-inputs.json)
 
 ## Running the project
 
