@@ -156,6 +156,8 @@ There are 3 essential props for this component: inputs, data and options.
 - ui.ySlider?: groups information on the y slider;
 - ui.ySlider.display?: indicates if the slider should be displayed;
 - ui.ySlider.step?: indicates the steps the slider should jump when sliding;
+- ui.xSlider.min?: indicates the minimum value for the slider;
+- ui.xSlider.max?: indicates the maximum value for the slider;
 - ui.stepsSwitcher?: indicates if the select drop down to switch the steps on-the-fly is displayed;
 - ui.resetStates?: indicates if the button to reset the states is displayed;
 - ui.description?: indicates the description text to show at the bottom of the chart;
