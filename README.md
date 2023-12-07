@@ -141,6 +141,7 @@ There are 3 essential props for this component: inputs, data and options.
 
 #### Category property
 - category?: indicates how the data from the table source should be categorized (this creates the datasets aka the legend);
+- category.property?: indicates the property name to use to categorize records;
 - category.usePalette?: indicates if a pre-determined (GeoChart specific) color palette should be used;
 - geochart.yAxis.paletteBackgrounds?: indicates the array of rgba color values to use as the palette for background coloring;
 - geochart.yAxis.paletteBorders?: indicates the array of rgb color values to use as the palette for border coloring;
