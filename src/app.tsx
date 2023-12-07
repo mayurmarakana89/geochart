@@ -27,7 +27,7 @@ export function App(props: TypeAppProps): JSX.Element {
   // Translation
   const { i18n } = useTranslation();
 
-  /** ****************************************** USE STATE SECTION START ************************************************ */
+  // #region USE STATE SECTION ****************************************************************************************
 
   const [inputs, setInputs] = useState() as [
     GeoChartConfig<ChartType> | undefined,
@@ -43,8 +43,9 @@ export function App(props: TypeAppProps): JSX.Element {
   const [isLoadingChart, setIsLoadingChart] = useState() as [boolean, React.Dispatch<React.SetStateAction<boolean>>];
   const [isLoadingDatasource, setIsLoadingDatasource] = useState() as [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 
-  /** ****************************************** USE STATE SECTION END ************************************************** */
-  /** *************************************** EVENT HANDLERS SECTION START ********************************************** */
+  // #endregion
+
+  // #region EVENT HANDLERS SECTION ***********************************************************************************
 
   /**
    * Handles when the Chart has to be loaded with data or options.
@@ -89,6 +90,10 @@ export function App(props: TypeAppProps): JSX.Element {
     if (ev.detail.state === 2) setIsLoadingDatasource(true);
   };
 
+  // #endregion
+
+  // #region HOOKS SECTION ********************************************************************************************
+
   /**
    * Handles when the Chart has parsed inputs.
    * @param theChart ChartType The chart type
@@ -113,9 +118,6 @@ export function App(props: TypeAppProps): JSX.Element {
     // eslint-disable-next-line no-alert
     alert(error);
   }, []);
-
-  /** **************************************** EVENT HANDLERS SECTION END *********************************************** */
-  /** ******************************************* HOOKS SECTION START *************************************************** */
 
   /**
    * Handles when the Chart language is changed.
@@ -144,8 +146,9 @@ export function App(props: TypeAppProps): JSX.Element {
     };
   }, [handleChartLanguage]);
 
-  /** ********************************************* HOOKS SECTION END *************************************************** */
-  /** ******************************************** RENDER SECTION START ************************************************* */
+  // #endregion
+
+  // #region RENDER SECTION START *************************************************************************************
 
   // Render the Chart
   return (
@@ -162,6 +165,8 @@ export function App(props: TypeAppProps): JSX.Element {
       onError={handleError}
     />
   );
+
+  // #endregion
 }
 
 export default App;

@@ -24,7 +24,7 @@ import { SchemaValidator, ValidatorResult } from './chart-schema-validator';
 import { createChartJSOptions, createChartJSData, fetchItemsViaQueryForDatasource, setColorPalettes } from './chart-parsing';
 import { isNumber, downloadJson, getColorFromPalette } from './chart-util';
 import { sxClasses } from './chart-style';
-import { logLow, logUseEffectMount, logUseEffectUnmount } from './logger';
+import { logHigh, logUseEffectMount, logUseEffectUnmount } from './logger';
 import T_EN from '../locales/en/translation.json';
 import T_FR from '../locales/fr/translation.json';
 
@@ -756,7 +756,7 @@ export function GeoChart<
   const handleChartJSAfterInit = useCallback(
     (chart: ChartJS<TType, TData, TLabel>): void => {
       // Log
-      logLow('CHARTJS AFTER INIT', chart, datasetRegistry);
+      logHigh('CHARTJS AFTER INIT', chart, datasetRegistry);
 
       // Make sure the UI fits with the registry state before the first render is made. Mostly useful for pie/doughnut charts.
       updateDatasetVisibilityUsingState(chart, datasetRegistry);
