@@ -1,3 +1,4 @@
+import { I18nextProvider, useTranslation } from 'react-i18next';
 import { Chart as ChartJS, ChartType, ChartOptions, ChartData, ChartDataset, registerables, ChartConfiguration, Plugin } from 'chart.js';
 import { Chart as ChartReact } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
@@ -25,8 +26,6 @@ import { createChartJSOptions, createChartJSData, fetchItemsViaQueryForDatasourc
 import { isNumber, downloadJson, getColorFromPalette } from './chart-util';
 import { sxClasses } from './chart-style';
 import { logHigh, logUseEffectMount, logUseEffectUnmount } from './logger';
-import T_EN from '../locales/en/translation.json';
-import T_FR from '../locales/fr/translation.json';
 
 // Activate useWhatChanged in development (leaving the code commented, see header of file for reason)
 // setUseWhatChange(process.env.NODE_ENV === 'development');
@@ -129,7 +128,6 @@ export function GeoChart<
   const w = window as any;
   // Fetch the cgpv module
   const { cgpv } = w;
-  const { useTranslation } = cgpv;
   const { useEffect, useState, useRef, useCallback, CSSProperties } = cgpv.react;
   const {
     Box,
@@ -1118,22 +1116,6 @@ export function GeoChart<
     };
   }, [action]);
 
-  // Effect hook to be executed with i18n
-  useEffect(() => {
-    // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - i18n';
-    logUseEffectMount(USE_EFFECT_FUNC);
-
-    // Add GeoChart translations file
-    i18n.addResourceBundle('en', 'translation', T_EN);
-    i18n.addResourceBundle('fr', 'translation', T_FR);
-
-    return () => {
-      // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
-    };
-  }, [i18n]);
-
   // #endregion
 
   // #region EVENT HANDLERS SECTION ***********************************************************************************
@@ -1670,10 +1652,12 @@ export function GeoChart<
    */
   const renderEverything = (): JSX.Element => {
     return (
-      <Box sx={sxClasses.mainContainer}>
-        {!isLoadingChart && renderChartContainer()}
-        {isLoadingChart && <CircularProgress />}
-      </Box>
+      <I18nextProvider i18n={i18n} defaultNS="translation">
+        <Box sx={sxClasses.mainContainer}>
+          {!isLoadingChart && renderChartContainer()}
+          {isLoadingChart && <CircularProgress />}
+        </Box>
+      </I18nextProvider>
     );
   };
 
