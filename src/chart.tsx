@@ -2,9 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { Chart as ChartJS, ChartType, ChartOptions, ChartData, ChartDataset, registerables, ChartConfiguration, Plugin } from 'chart.js';
 import { Chart as ChartReact } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
-// Keeping the import line commented, until we decide to use it or code an equivalent.
-// So that a dev can locally install it to work. This package is pretty useful to track this GeoChart Component.
-// import { useWhatChanged, setUseWhatChange } from '@simbathesailor/use-what-changed';
 import {
   GeoChartConfig,
   GeoChartAction,
@@ -25,10 +22,7 @@ import { SchemaValidator, ValidatorResult } from './chart-schema-validator';
 import { createChartJSOptions, createChartJSData, fetchItemsViaQueryForDatasource, setColorPalettes } from './chart-parsing';
 import { isNumber, downloadJson, getColorFromPalette } from './utils';
 import { sxClasses } from './chart-style';
-import { logHigh, logUseEffectMount, logUseEffectUnmount } from './logger';
-
-// Activate useWhatChanged in development (leaving the code commented, see header of file for reason)
-// setUseWhatChange(process.env.NODE_ENV === 'development');
+import { logger } from './logger';
 
 /**
  * Main props for the Chart.
@@ -132,6 +126,7 @@ export function GeoChart<
   // Fetch the cgpv module
   const { cgpv } = w;
   const { useEffect, useState, useRef, useCallback, CSSProperties } = cgpv.react;
+  // const { useWhatChanged } = cgpv.ui;
   const {
     Box,
     Grid,
@@ -427,6 +422,9 @@ export function GeoChart<
       paletteBackgrounds: string[] | undefined,
       paletteBorders: string[] | undefined
     ): void => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART - processDatasets', items, catPropertyName);
+
       // Check
       if (!items || !catPropertyName) return;
 
@@ -500,6 +498,9 @@ export function GeoChart<
       paletteBackgrounds: string[] | undefined,
       paletteBorders: string[] | undefined
     ): void => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART - processLabels', theChartType, items);
+
       // Check
       if (!items || !labelPropertyName) return;
 
@@ -572,6 +573,9 @@ export function GeoChart<
    */
   const updateDatasetVisibilityUsingState = useCallback(
     (theChartRef: ChartJS<TType, TData, TLabel>, theDatasetRegistry: GeoChartSelectedDataset): void => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART - updateDatasetVisibilityUsingState', theChartRef, theDatasetRegistry);
+
       if (!theChartRef) return;
 
       // Get the current dataset labels
@@ -598,6 +602,9 @@ export function GeoChart<
    */
   const updateDataVisibilityUsingState = useCallback(
     (theChartRef: ChartJS<TType, TData, TLabel>, theDatasRegistry: GeoChartSelectedDataset): void => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART - processLoadingRecords', theChartRef, theDatasRegistry);
+
       // Check
       if (!theChartRef) return;
 
@@ -636,6 +643,9 @@ export function GeoChart<
       theSteps: StepsPossibilities,
       records: TypeJsonObject[] | undefined
     ): void => {
+      // Log
+      logger.logTraceUseCallback('GEOCHART - processLoadingRecords', theInputs, theDatasetRegistry, theDatasRegistry, theLanguage);
+
       // Parse the data
       const parsedOptions = createChartJSOptions<TType>(theInputs, parentOptions!, theLanguage);
       const parsedData = createChartJSData<TType, TData, TLabel>(
@@ -689,6 +699,15 @@ export function GeoChart<
       xValues: number | number[],
       yValues: number | number[]
     ): void => {
+      // Log
+      logger.logTraceUseCallback(
+        'GEOCHART - processLoadingRecordsFilteringFirst',
+        theInputs,
+        theDatasetRegistry,
+        theDatasRegistry,
+        theLanguage
+      );
+
       // If chart type is line
       let resItemsFinal: TypeJsonObject[] = records ? [...records] : [];
       if (theInputs?.chart === 'line') {
@@ -760,7 +779,7 @@ export function GeoChart<
   const handleChartJSAfterInit = useCallback(
     (chart: ChartJS<TType, TData, TLabel>): void => {
       // Log
-      logHigh('CHARTJS AFTER INIT', chart, datasetRegistry);
+      logger.logTraceUseCallback('GEOCHART - handleChartJSAfterInit', chart, datasRegistry, datasetRegistry);
 
       // Make sure the UI fits with the registry state before the first render is made. Mostly useful for pie/doughnut charts.
       updateDatasetVisibilityUsingState(chart, datasetRegistry);
@@ -776,8 +795,8 @@ export function GeoChart<
   // Effect hook when the inputs change - coming from parent component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - PARENT - INPUTS';
-    logUseEffectMount(USE_EFFECT_FUNC, parentInputs);
+    const USE_EFFECT_FUNC = 'GEOCHART - PARENT - INPUTS';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, parentInputs);
 
     // Refresh the inputs in this component
     setInputs(parentInputs);
@@ -796,15 +815,15 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC, parentInputs);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, parentInputs);
     };
   }, [parentInputs, schemaValidator]);
 
   // Effect hook when the main props about charttype, options and data change - coming from parent component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - PARENT - CHARTJS INPUTS';
-    logUseEffectMount(USE_EFFECT_FUNC);
+    const USE_EFFECT_FUNC = 'GEOCHART - PARENT - CHARTJS INPUTS';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC);
 
     // Override
     setChartType(parentChart!);
@@ -813,60 +832,60 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
   }, [parentChart, parentOptions, parentData]);
 
   // Effect hook when the selected datasource changes - coming from parent component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - PARENT - DATASOURCE';
-    logUseEffectMount(USE_EFFECT_FUNC, parentDatasource);
+    const USE_EFFECT_FUNC = 'GEOCHART - PARENT - DATASOURCE';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, parentDatasource);
 
     // Set the datasource as provided
     setSelectedDatasource(parentDatasource);
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC, parentDatasource);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, parentDatasource);
     };
   }, [parentDatasource]);
 
   // Effect hook to be executed with loading datasource - coming from parent component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - PARENT - LOADING DATASOURCE';
-    logUseEffectMount(USE_EFFECT_FUNC, parentLoadingDatasource);
+    const USE_EFFECT_FUNC = 'GEOCHART - PARENT - LOADING DATASOURCE';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, parentLoadingDatasource);
 
     // If defined, update the state
     if (parentLoadingDatasource !== undefined) setIsLoadingDatasource(parentLoadingDatasource);
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
   }, [parentLoadingDatasource]);
 
   // Effect hook when an action needs to happen - coming from parent component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - PARENT - ACTION';
-    logUseEffectMount(USE_EFFECT_FUNC, parentAction);
+    const USE_EFFECT_FUNC = 'GEOCHART - PARENT - ACTION';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, parentAction);
 
     // Set action for the component
     if (parentAction) setAction(parentAction);
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
   }, [parentAction]);
 
   // Effect hook when i18n changes - coming from parent component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - i18n';
-    logUseEffectMount(USE_EFFECT_FUNC);
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - i18n';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC);
 
     // We have to clone i18n, because otherwise the i18n is shared across all GeoCharts (so we can't have GeoChart simultaneously in diff languages per application).
     // I also couldn't make it work with changeLanguage either, so it's just re-cloning when the language changes.
@@ -878,7 +897,7 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
   }, [i18nReact, language]);
 
@@ -888,6 +907,10 @@ export function GeoChart<
 
   // Effect hook ran once when initializing
   useEffect(() => {
+    // Log
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - PLUGINS';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, handleChartJSAfterInit);
+
     const plugin = {
       id: 'geochart-chartjs-plugin',
       afterInit: (chartEvent: unknown): void => handleChartJSAfterInit(chartEvent as ChartJS<TType, TData, TLabel>),
@@ -895,13 +918,18 @@ export function GeoChart<
 
     // Register
     setPlugins([plugin]);
+
+    return () => {
+      // Log
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
+    };
   }, [handleChartJSAfterInit]);
 
   // Effect hook when the inputs change - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - INPUTS';
-    logUseEffectMount(USE_EFFECT_FUNC, inputs);
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - INPUTS';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, inputs);
 
     // Async function to fetch data from within a sync useEffect :|
     const fetchAndSetSelectedDatasource = async (
@@ -934,7 +962,7 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC, inputs);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, inputs);
     };
     // NO REACT for 'onError' (explicitely excluding it here instead of relying on
     // the parent component to have used useCallback as they should have)
@@ -944,8 +972,8 @@ export function GeoChart<
   // Effect hook when the selected datasource changes - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - PROCESS DATA - REGISTRY';
-    logUseEffectMount(USE_EFFECT_FUNC, inputs, selectedDatasource);
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - SELECTED DATASOURCE';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, inputs, selectedDatasource);
 
     // If selectedDatasource is specified
     if (inputs && selectedDatasource) {
@@ -969,15 +997,15 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC, selectedDatasource);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, selectedDatasource);
     };
   }, [inputs, selectedDatasource, processDatasets, processLabels]);
 
   // Effect hook when the selected datasource changes - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - PROCESS DATA - DATA';
-    logUseEffectMount(USE_EFFECT_FUNC, inputs, selectedDatasource);
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - DATASOURCE STEPS SLIDERS';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, inputs, selectedDatasource);
 
     // If selectedDatasource is specified
     if (inputs && selectedDatasource) {
@@ -1017,7 +1045,7 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC, selectedDatasource);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, selectedDatasource);
     };
   }, [
     inputs,
@@ -1035,8 +1063,8 @@ export function GeoChart<
   // Effect hook when the chartOptions, chartData change - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - CHARTJS OPTIONS+DATA';
-    logUseEffectMount(USE_EFFECT_FUNC, chartOptions, chartData);
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - CHARTJS OPTIONS+DATA';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, chartOptions, chartData);
 
     // If chart options. Validate the parsing we did do follow ChartJS options schema validating
     if (chartOptions) setValidatorOptions(schemaValidator.validateOptions(chartOptions));
@@ -1046,45 +1074,45 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
   }, [chartOptions, chartData, schemaValidator]);
 
   // Effect hook when the datasetRegistry change - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - SELECTED DATASETS';
-    logUseEffectMount(USE_EFFECT_FUNC);
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - DATASETS REGISTRY';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC);
 
     // Make sure the visibility of the chart aligns with the selected datasets
     updateDatasetVisibilityUsingState(chartRef.current, datasetRegistry);
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
   }, [datasetRegistry, updateDatasetVisibilityUsingState]);
 
   // Effect hook when the datasRegistry change - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - SELECTED DATAS';
-    logUseEffectMount(USE_EFFECT_FUNC);
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - DATAS REGISTRY';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC);
 
     // Make sure the visibility of the chart aligns with the selected datas
     updateDataVisibilityUsingState(chartRef.current, datasRegistry);
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
   }, [datasRegistry, updateDataVisibilityUsingState]);
 
   // Effect hook to validate the schemas of inputs - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - VALIDATORS - INPUTS';
-    logUseEffectMount(USE_EFFECT_FUNC, hasValidSchemas([validatorInputs]));
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - VALIDATORS - INPUTS';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, hasValidSchemas([validatorInputs]));
 
     // If any error
     if (!hasValidSchemas([validatorInputs])) {
@@ -1096,7 +1124,7 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
     // NO REACT for 'onError' (explicitely excluding it here instead of relying on
     // the parent component to have used useCallback as they should have)
@@ -1106,8 +1134,8 @@ export function GeoChart<
   // Effect hook to validate the schemas of inputs - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - VALIDATORS - OPTIONS+DATA';
-    logUseEffectMount(USE_EFFECT_FUNC, hasValidSchemas([validatorOptions, validatorData]));
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - VALIDATORS - OPTIONS+DATA';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, hasValidSchemas([validatorOptions, validatorData]));
 
     // If any error
     if (!hasValidSchemas([validatorOptions, validatorData])) {
@@ -1119,7 +1147,7 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
     // NO REACT for 'onError' (explicitely excluding it here instead of relying on
     // the parent component to have used useCallback as they should have)
@@ -1129,8 +1157,8 @@ export function GeoChart<
   // Effect hook when an action needs to happen - coming from this component.
   useEffect(() => {
     // Log
-    const USE_EFFECT_FUNC = 'GEOCHART - USE EFFECT - CURRENT - ACTION';
-    logUseEffectMount(USE_EFFECT_FUNC, action);
+    const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - ACTION';
+    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, action);
 
     // If redraw is true, reset the property in the action, set the redraw property to true for the chart, then prep a timer to reset it to false after the redraw has happened.
     // A bit funky, but only way I could find without having code the logic within the Parent Component.
@@ -1142,7 +1170,7 @@ export function GeoChart<
 
     return () => {
       // Log
-      logUseEffectUnmount(USE_EFFECT_FUNC);
+      logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
   }, [action]);
 
@@ -1212,7 +1240,7 @@ export function GeoChart<
    * Handles when the X Slider changes
    * @param value number | number[] Indicates the slider value
    */
-  const handleSliderXChange = (newValue: number | number[]): void => {
+  const handleSliderXChange = (event: Event, newValue: number | number[]): void => {
     // Set the X State
     setXSliderValues(newValue);
 
@@ -1224,7 +1252,7 @@ export function GeoChart<
    * Handles when the Y Slider changes
    * @param value number | number[] Indicates the slider value
    */
-  const handleSliderYChange = (newValue: number | number[]): void => {
+  const handleSliderYChange = (event: Event, newValue: number | number[]): void => {
     // Set the Y State
     setYSliderValues(newValue);
 
@@ -1400,7 +1428,7 @@ export function GeoChart<
               max={xSliderMax}
               step={xSliderSteps}
               value={xSliderValues || 0}
-              customOnChange={handleSliderXChange}
+              onChangeCommitted={handleSliderXChange}
               onValueDisplay={handleSliderXValueDisplay}
               onValueDisplayAriaLabel={handleSliderXValueDisplay}
             />
@@ -1429,7 +1457,7 @@ export function GeoChart<
               step={ySliderSteps}
               value={ySliderValues || 0}
               orientation="vertical"
-              customOnChange={handleSliderYChange}
+              onChangeCommitted={handleSliderYChange}
               onValueDisplay={handleSliderYValueDisplay}
               onValueDisplayAriaLabel={handleSliderYValueDisplay}
             />
