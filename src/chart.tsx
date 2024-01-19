@@ -22,7 +22,6 @@ import { SchemaValidator, ValidatorResult } from './chart-schema-validator';
 import { createChartJSOptions, createChartJSData, fetchItemsViaQueryForDatasource, setColorPalettes } from './chart-parsing';
 import { isNumber, downloadJson, getColorFromPalette } from './utils';
 import { sxClasses } from './chart-style';
-import { logger } from './logger';
 
 /**
  * Main props for the Chart.
@@ -125,7 +124,9 @@ export function GeoChart<
   const w = window as any;
   // Fetch the cgpv module
   const { cgpv } = w;
+  const { logger } = cgpv;
   const { useEffect, useState, useRef, useCallback, CSSProperties } = cgpv.react;
+  // Leaving the code commented purposely in case we want it fast
   // const { useWhatChanged } = cgpv.ui;
   const {
     Box,
@@ -557,7 +558,7 @@ export function GeoChart<
         setColorPaletteAxisBorderIndex(borderIndex);
       }
     },
-    [datasRegistry, colorPaletteAxisBackgroundIndex, colorPaletteAxisBorderIndex]
+    [datasRegistry, colorPaletteAxisBackgroundIndex, colorPaletteAxisBorderIndex, logger]
   ) as (
     theChartType: string,
     items: TypeJsonObject[] | undefined,
@@ -592,7 +593,7 @@ export function GeoChart<
       // Update visibility
       theChartRef.update();
     },
-    []
+    [logger]
   ) as (theChartRef: ChartJS<TType, TData, TLabel>, theDatasetRegistry: GeoChartSelectedDataset) => void;
 
   /**
@@ -626,7 +627,7 @@ export function GeoChart<
         theChartRef.update();
       }
     },
-    []
+    [logger]
   ) as (theChartRef: ChartJS<TType, TData, TLabel>, theDatasRegistry: GeoChartSelectedDataset) => void;
 
   /**
@@ -671,7 +672,7 @@ export function GeoChart<
     // NO REACT for 'onParsed' (explicitely excluding it here instead of relying on
     // the parent component to have used useCallback as they should have)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [parentOptions, parentData]
+    [parentOptions, parentData, logger]
   ) as (
     theInputs: GeoChartConfig<TType>,
     theDatasetRegistry: GeoChartSelectedDataset,
@@ -756,7 +757,7 @@ export function GeoChart<
       // Set new filtered inputs
       setFilteredRecords(resItemsFinal);
     },
-    [processLoadingRecords]
+    [processLoadingRecords, logger]
   ) as (
     theInputs: GeoChartConfig<TType>,
     theDatasetRegistry: GeoChartSelectedDataset,
@@ -785,7 +786,7 @@ export function GeoChart<
       updateDatasetVisibilityUsingState(chart, datasetRegistry);
       updateDataVisibilityUsingState(chart, datasRegistry);
     },
-    [datasRegistry, datasetRegistry, updateDataVisibilityUsingState, updateDatasetVisibilityUsingState]
+    [datasRegistry, datasetRegistry, updateDataVisibilityUsingState, updateDatasetVisibilityUsingState, logger]
   );
 
   // #endregion
@@ -817,7 +818,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, parentInputs);
     };
-  }, [parentInputs, schemaValidator]);
+  }, [parentInputs, schemaValidator, logger]);
 
   // Effect hook when the main props about charttype, options and data change - coming from parent component.
   useEffect(() => {
@@ -834,7 +835,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [parentChart, parentOptions, parentData]);
+  }, [parentChart, parentOptions, parentData, logger]);
 
   // Effect hook when the selected datasource changes - coming from parent component.
   useEffect(() => {
@@ -849,7 +850,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, parentDatasource);
     };
-  }, [parentDatasource]);
+  }, [parentDatasource, logger]);
 
   // Effect hook to be executed with loading datasource - coming from parent component.
   useEffect(() => {
@@ -864,7 +865,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [parentLoadingDatasource]);
+  }, [parentLoadingDatasource, logger]);
 
   // Effect hook when an action needs to happen - coming from parent component.
   useEffect(() => {
@@ -879,7 +880,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [parentAction]);
+  }, [parentAction, logger]);
 
   // Effect hook when i18n changes - coming from parent component.
   useEffect(() => {
@@ -899,7 +900,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [i18nReact, language]);
+  }, [i18nReact, language, logger]);
 
   // #endregion
 
@@ -923,7 +924,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [handleChartJSAfterInit]);
+  }, [handleChartJSAfterInit, logger]);
 
   // Effect hook when the inputs change - coming from this component.
   useEffect(() => {
@@ -967,7 +968,7 @@ export function GeoChart<
     // NO REACT for 'onError' (explicitely excluding it here instead of relying on
     // the parent component to have used useCallback as they should have)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputs, i18n.language]);
+  }, [inputs, i18n.language, logger]);
 
   // Effect hook when the selected datasource changes - coming from this component.
   useEffect(() => {
@@ -999,7 +1000,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC, selectedDatasource);
     };
-  }, [inputs, selectedDatasource, processDatasets, processLabels]);
+  }, [inputs, selectedDatasource, processDatasets, processLabels, logger]);
 
   // Effect hook when the selected datasource changes - coming from this component.
   useEffect(() => {
@@ -1058,6 +1059,7 @@ export function GeoChart<
     ySliderValues,
     processLoadingRecordsFilteringFirst,
     processLoadingRecords,
+    logger,
   ]);
 
   // Effect hook when the chartOptions, chartData change - coming from this component.
@@ -1076,7 +1078,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [chartOptions, chartData, schemaValidator]);
+  }, [chartOptions, chartData, schemaValidator, logger]);
 
   // Effect hook when the datasetRegistry change - coming from this component.
   useEffect(() => {
@@ -1091,7 +1093,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [datasetRegistry, updateDatasetVisibilityUsingState]);
+  }, [datasetRegistry, updateDatasetVisibilityUsingState, logger]);
 
   // Effect hook when the datasRegistry change - coming from this component.
   useEffect(() => {
@@ -1106,7 +1108,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [datasRegistry, updateDataVisibilityUsingState]);
+  }, [datasRegistry, updateDataVisibilityUsingState, logger]);
 
   // Effect hook to validate the schemas of inputs - coming from this component.
   useEffect(() => {
@@ -1129,7 +1131,7 @@ export function GeoChart<
     // NO REACT for 'onError' (explicitely excluding it here instead of relying on
     // the parent component to have used useCallback as they should have)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validatorInputs, t]);
+  }, [validatorInputs, t, logger]);
 
   // Effect hook to validate the schemas of inputs - coming from this component.
   useEffect(() => {
@@ -1152,7 +1154,7 @@ export function GeoChart<
     // NO REACT for 'onError' (explicitely excluding it here instead of relying on
     // the parent component to have used useCallback as they should have)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validatorOptions, validatorData, t]);
+  }, [validatorOptions, validatorData, t, logger]);
 
   // Effect hook when an action needs to happen - coming from this component.
   useEffect(() => {
@@ -1172,7 +1174,7 @@ export function GeoChart<
       // Log
       logger.logTraceUseEffectUnmount(USE_EFFECT_FUNC);
     };
-  }, [action]);
+  }, [action, logger]);
 
   // #endregion
 
