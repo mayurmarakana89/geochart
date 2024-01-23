@@ -479,7 +479,7 @@ export function GeoChart<
         setDatasetRegistry({ ...datasetRegistry });
       }
     },
-    [datasetRegistry, colorPaletteCategoryBackgroundIndex, colorPaletteCategoryBorderIndex]
+    [datasetRegistry, colorPaletteCategoryBackgroundIndex, colorPaletteCategoryBorderIndex, logger]
   ) as (
     items: TypeJsonObject[] | undefined,
     catPropertyName: string | undefined,
@@ -797,7 +797,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - PARENT - INPUTS';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, parentInputs);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, parentInputs);
 
     // Refresh the inputs in this component
     setInputs(parentInputs);
@@ -824,7 +824,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - PARENT - CHARTJS INPUTS';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC);
 
     // Override
     setChartType(parentChart!);
@@ -841,7 +841,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - PARENT - DATASOURCE';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, parentDatasource);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, parentDatasource);
 
     // Set the datasource as provided
     setSelectedDatasource(parentDatasource);
@@ -856,7 +856,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - PARENT - LOADING DATASOURCE';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, parentLoadingDatasource);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, parentLoadingDatasource);
 
     // If defined, update the state
     if (parentLoadingDatasource !== undefined) setIsLoadingDatasource(parentLoadingDatasource);
@@ -871,7 +871,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - PARENT - ACTION';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, parentAction);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, parentAction);
 
     // Set action for the component
     if (parentAction) setAction(parentAction);
@@ -886,7 +886,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - i18n';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC);
 
     // We have to clone i18n, because otherwise the i18n is shared across all GeoCharts (so we can't have GeoChart simultaneously in diff languages per application).
     // I also couldn't make it work with changeLanguage either, so it's just re-cloning when the language changes.
@@ -910,7 +910,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - PLUGINS';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, handleChartJSAfterInit);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC);
 
     const plugin = {
       id: 'geochart-chartjs-plugin',
@@ -930,7 +930,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - INPUTS';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, inputs);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, inputs);
 
     // Async function to fetch data from within a sync useEffect :|
     const fetchAndSetSelectedDatasource = async (
@@ -974,7 +974,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - SELECTED DATASOURCE';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, inputs, selectedDatasource);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, inputs, selectedDatasource);
 
     // If selectedDatasource is specified
     if (inputs && selectedDatasource) {
@@ -1006,7 +1006,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - DATASOURCE STEPS SLIDERS';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, inputs, selectedDatasource);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, inputs, selectedDatasource);
 
     // If selectedDatasource is specified
     if (inputs && selectedDatasource) {
@@ -1066,7 +1066,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - CHARTJS OPTIONS+DATA';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, chartOptions, chartData);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, chartOptions, chartData);
 
     // If chart options. Validate the parsing we did do follow ChartJS options schema validating
     if (chartOptions) setValidatorOptions(schemaValidator.validateOptions(chartOptions));
@@ -1084,7 +1084,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - DATASETS REGISTRY';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC);
 
     // Make sure the visibility of the chart aligns with the selected datasets
     updateDatasetVisibilityUsingState(chartRef.current, datasetRegistry);
@@ -1099,7 +1099,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - DATAS REGISTRY';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC);
 
     // Make sure the visibility of the chart aligns with the selected datas
     updateDataVisibilityUsingState(chartRef.current, datasRegistry);
@@ -1114,7 +1114,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - VALIDATORS - INPUTS';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, hasValidSchemas([validatorInputs]));
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, hasValidSchemas([validatorInputs]));
 
     // If any error
     if (!hasValidSchemas([validatorInputs])) {
@@ -1137,7 +1137,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - VALIDATORS - OPTIONS+DATA';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, hasValidSchemas([validatorOptions, validatorData]));
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, hasValidSchemas([validatorOptions, validatorData]));
 
     // If any error
     if (!hasValidSchemas([validatorOptions, validatorData])) {
@@ -1160,7 +1160,7 @@ export function GeoChart<
   useEffect(() => {
     // Log
     const USE_EFFECT_FUNC = 'GEOCHART - CURRENT - ACTION';
-    logger.logTraceUseEffectMount(USE_EFFECT_FUNC, action);
+    logger.logTraceUseEffect(USE_EFFECT_FUNC, action);
 
     // If redraw is true, reset the property in the action, set the redraw property to true for the chart, then prep a timer to reset it to false after the redraw has happened.
     // A bit funky, but only way I could find without having code the logic within the Parent Component.
