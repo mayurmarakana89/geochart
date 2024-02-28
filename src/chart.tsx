@@ -198,11 +198,11 @@ export function GeoChart<
     GeoChartDatasource | undefined,
     React.Dispatch<GeoChartDatasource | undefined>
   ];
+  const [action, setAction] = useState(parentAction) as [GeoChartAction, React.Dispatch<GeoChartAction>];
   const [redraw, setRedraw] = useState(parentAction?.shouldRedraw) as [boolean | undefined, React.Dispatch<boolean | undefined>];
   const [isLoadingDatasource, setIsLoadingDatasource] = useState(parentLoadingDatasource) as [boolean, React.Dispatch<boolean>];
 
   // Inner component states unrelated to the parent component
-  const [action, setAction] = useState() as [GeoChartAction, React.Dispatch<GeoChartAction>];
   const [datasetRegistry, setDatasetRegistry] = useState({}) as [GeoChartSelectedDataset, React.Dispatch<GeoChartSelectedDataset>];
   const [datasRegistry, setDatasRegistry] = useState({}) as [GeoChartSelectedDataset, React.Dispatch<GeoChartSelectedDataset>];
   const [filteredRecords, setFilteredRecords] = useState() as [TypeJsonObject[] | undefined, React.Dispatch<TypeJsonObject[] | undefined>];

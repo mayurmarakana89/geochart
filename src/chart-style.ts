@@ -4,7 +4,6 @@
 export const sxClasses = {
   mainContainer: {
     width: '100%',
-    minHeight: '400px',
   },
   mainGeoChartContainer: {},
   header: {
