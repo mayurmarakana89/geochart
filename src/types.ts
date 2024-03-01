@@ -276,6 +276,7 @@ export const DEFAULT_COLOR_PALETTE_CUSTOM_ALT_OPAQUE: string[] = DEFAULT_COLOR_P
  * The date formatting to show the dates on the Axis.
  */
 export const DATE_OPTIONS_AXIS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
   month: 'short',
   day: 'numeric',
 };

@@ -21,7 +21,7 @@ import {
 import { SchemaValidator, ValidatorResult } from './chart-schema-validator';
 import { createChartJSOptions, createChartJSData, fetchItemsViaQueryForDatasource, setColorPalettes } from './chart-parsing';
 import { isNumber, downloadJson, getColorFromPalette } from './utils';
-import { sxClasses } from './chart-style';
+import { getSxClasses } from './chart-style';
 
 /**
  * Main props for the Chart.
@@ -129,6 +129,7 @@ export function GeoChart<
   // Leaving the code commented purposely in case we want it fast
   // const { useWhatChanged } = cgpv.ui;
   const {
+    Paper,
     Box,
     Grid,
     Button,
@@ -140,6 +141,7 @@ export function GeoChart<
     Typography,
     SliderBase: Slider,
     CircularProgress,
+    cgpvTheme,
   } = cgpv.ui.elements;
   const {
     sx: elStyle,
@@ -167,6 +169,7 @@ export function GeoChart<
     onParsed,
     onError,
   } = props;
+  const sxClasses = getSxClasses(cgpvTheme);
 
   // Translation
   const { i18n: i18nReact } = useTranslation();
@@ -1490,7 +1493,11 @@ export function GeoChart<
    */
   const renderDownload = (): JSX.Element => {
     if (inputs?.ui?.download) {
-      return <ButtonDropDown onButtonClick={handleDownloadClick} options={[t('geochart.downloadFiltered'), t('geochart.downloadAll')]} />;
+      return (
+        <Box sx={sxClasses.downloadButton}>
+          <ButtonDropDown onButtonClick={handleDownloadClick} options={[t('geochart.downloadFiltered'), t('geochart.downloadAll')]} />
+        </Box>
+      );
     }
     return <Box />;
   };
@@ -1574,10 +1581,10 @@ export function GeoChart<
    */
   const renderUIOptions = (): JSX.Element => {
     return (
-      <Box sx={sxClasses.uiOptions}>
+      <>
         {renderUIOptionsStepsSwitcher()}
-        {renderUIOptionsResetStates()}
-      </Box>
+        {false && renderUIOptionsResetStates()}
+      </>
     );
   };
 
@@ -1590,7 +1597,7 @@ export function GeoChart<
       if (Object.keys(datasetRegistry).length > 1) {
         const label = chartType === 'pie' || chartType === 'doughnut' ? `${t('geochart.category')}:` : '';
         return (
-          <Box>
+          <>
             <Typography sx={sxClasses.checkDatasetWrapperLabel}>{label}</Typography>
             {Object.entries(datasetRegistry)
               .filter(([, dsOption]: [string, GeoChartDatasetOption]) => {
@@ -1614,7 +1621,7 @@ export function GeoChart<
                   </Box>
                 );
               })}
-          </Box>
+          </>
         );
       }
     }
@@ -1632,7 +1639,7 @@ export function GeoChart<
       if (chartType === 'pie' || chartType === 'doughnut') {
         if (Object.keys(datasRegistry).length > 1) {
           return (
-            <Box>
+            <>
               {Object.entries(datasRegistry)
                 .filter(([, dsOption]: [string, GeoChartDatasetOption]) => {
                   return dsOption.visible;
@@ -1654,7 +1661,7 @@ export function GeoChart<
                     </Box>
                   );
                 })}
-            </Box>
+            </>
           );
         }
       }
@@ -1671,17 +1678,21 @@ export function GeoChart<
   const renderChartContainer = (): JSX.Element => {
     // The xs: 1, 11 and 12 used here are as documented online
     return (
-      <Box sx={{ ...sx, ...sxClasses.mainGeoChartContainer }}>
+      <Paper sx={{ ...sx, ...sxClasses.mainGeoChartContainer }}>
         <Grid container>
           <Grid item xs={12}>
             <Box sx={sxClasses.header}>
               {renderDatasourceSelector()}
-              {renderTitle()}
               {renderUIOptions()}
+              {renderDownload()}
             </Box>
-            {renderDataSelector()}
-            {renderDatasetSelector()}
+            <Box sx={sxClasses.title}>{renderTitle()}</Box>
+            <Box sx={sxClasses.dataset}>
+              {renderDataSelector()}
+              {renderDatasetSelector()}
+            </Box>
           </Grid>
+
           <Grid item xs={1}>
             {renderYAxisLabel()}
           </Grid>
@@ -1692,17 +1703,19 @@ export function GeoChart<
           <Grid item xs={1}>
             {renderYSlider()}
           </Grid>
-          <Grid item xs={1} />
-          <Grid item xs={10}>
+
+          <Grid item xs={1.25} />
+          <Grid item xs={9.75}>
             {renderXAxisLabel()}
             {renderXSlider()}
           </Grid>
+          <Grid item xs={1} />
+
           <Grid item xs={12}>
             {renderDescription()}
-            {renderDownload()}
           </Grid>
         </Grid>
-      </Box>
+      </Paper>
     );
   };
 
@@ -1759,5 +1772,5 @@ GeoChart.defaultProps = {
       },
     },
   } as ChartOptions<ChartType>,
-  data: { datasets: [], labels: [] },
+  data: { datasets: [], labels: [], borderWidth: 10 },
 };
