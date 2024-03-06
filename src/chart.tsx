@@ -1419,6 +1419,26 @@ export function GeoChart<
   };
 
   /**
+   * Generate marker labels for the slider values
+   * @returns The array of slider markers
+   */
+  const getMarkers = useCallback((sliderValues: number | number[]) => {
+    const sliderMarks: {
+      value: number;
+      label: string;
+    }[] = [];
+    if (Array.isArray(sliderValues)) {
+      for (let i = 0; i < sliderValues.length; i++) {
+        sliderMarks.push({
+          value: sliderValues[i],
+          label: new Date(sliderValues[i]).toISOString().slice(0, 10),
+        });
+      }
+    }
+    return sliderMarks;
+  }, []);
+
+  /**
    * Renders the X Chart Slider JSX.Element or an empty box
    * @returns The X Chart Slider JSX.Element or an empty box
    */
@@ -1429,6 +1449,7 @@ export function GeoChart<
         return (
           <Box sx={sxClasses.xSliderWrapper}>
             <Slider
+              marks={getMarkers(xSliderValues)}
               min={xSliderMin}
               max={xSliderMax}
               step={xSliderSteps}
@@ -1457,6 +1478,7 @@ export function GeoChart<
         return (
           <Box sx={sxClasses.ySliderWrapper}>
             <Slider
+              marks={getMarkers(ySliderValues)}
               min={ySliderMin}
               max={ySliderMax}
               step={ySliderSteps}
