@@ -631,6 +631,7 @@ export function createChartJSOptions<TType extends ChartType>(
           major: {
             enabled: true,
           },
+          padding: 10,
           source: 'auto',
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           callback: (tickValue: number | Date | string, index: number, ticks: Tick[]): string => {
@@ -652,6 +653,7 @@ export function createChartJSOptions<TType extends ChartType>(
             return '';
           },
         },
+        offset: true,
       },
     };
   }
