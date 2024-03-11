@@ -7,6 +7,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => {
   return {
     mainContainer: {
+      fontFamily: theme.typography.body1.fontFamily,
       borderColor: theme.palette.geoViewColor.primary.main,
       borderWidth: '2px',
       borderStyle: 'solid',
@@ -52,23 +53,28 @@ export const getSxClasses = (theme: Theme) => {
       justifyContent: 'center',
     },
     title: {
-      fontWeight: 'bold',
-      fontSize: theme.palette.geoViewFontSize.lg,
+      fontFamily: theme.typography.h5.fontFamily,
+      fontWeight: theme.typography.h5.fontWeight,
+      fontSize: theme.typography.h5.fontSize,
       textAlign: 'center',
       margin: '10px 0px',
     },
     xAxisLabel: {
+      fontFamily: theme.typography.body1.fontFamily,
+      fontWeight: theme.typography.fontWeightBold,
+      fontSize: theme.typography.body1.fontSize,
       textAlign: 'center',
       margin: '10px 0px',
-      fontWeight: 'bold',
     },
     yAxisLabel: {
+      fontFamily: theme.typography.body1.fontFamily,
+      fontWeight: theme.typography.fontWeightBold,
+      fontSize: theme.typography.body1.fontSize,
       position: 'relative',
       margin: 'auto',
       writingMode: 'vertical-rl',
       transform: 'rotate(-180deg)',
       transformOrigin: 'bottom center',
-      fontWeight: 'bold',
       marginTop: '-15%',
     },
     uiOptionsResetStates: {
@@ -88,6 +94,7 @@ export const getSxClasses = (theme: Theme) => {
       },
     },
     checkDatasetLabel: {
+      fontFamily: theme.typography.body1.fontFamily,
       display: 'inline-flex',
       verticalAlign: 'middle',
       marginRight: '20px !important',
