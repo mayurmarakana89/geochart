@@ -46335,6 +46335,7 @@ function createChartJSOptions(chartConfig, defaultOptions, language) {
           major: {
             enabled: true
           },
+          padding: 10,
           source: 'auto',
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           callback: function callback(tickValue, index, ticks) {
@@ -46355,7 +46356,8 @@ function createChartJSOptions(chartConfig, defaultOptions, language) {
             // No label, redundant
             return '';
           }
-        }
+        },
+        offset: true
       }
     });
   }
@@ -46430,6 +46432,7 @@ var getSxClasses = function getSxClasses(theme) {
   var _theme$palette$geoVie, _theme$palette$geoVie2;
   return {
     mainContainer: {
+      fontFamily: theme.typography.body1.fontFamily,
       borderColor: theme.palette.geoViewColor.primary.main,
       borderWidth: '2px',
       borderStyle: 'solid',
@@ -46475,23 +46478,28 @@ var getSxClasses = function getSxClasses(theme) {
       justifyContent: 'center'
     },
     title: {
-      fontWeight: 'bold',
-      fontSize: theme.palette.geoViewFontSize.lg,
+      fontFamily: theme.typography.h5.fontFamily,
+      fontWeight: theme.typography.h5.fontWeight,
+      fontSize: theme.typography.h5.fontSize,
       textAlign: 'center',
       margin: '10px 0px'
     },
     xAxisLabel: {
+      fontFamily: theme.typography.body1.fontFamily,
+      fontWeight: theme.typography.fontWeightBold,
+      fontSize: theme.typography.body1.fontSize,
       textAlign: 'center',
-      margin: '10px 0px',
-      fontWeight: 'bold'
+      margin: '10px 0px'
     },
     yAxisLabel: {
+      fontFamily: theme.typography.body1.fontFamily,
+      fontWeight: theme.typography.fontWeightBold,
+      fontSize: theme.typography.body1.fontSize,
       position: 'relative',
       margin: 'auto',
       writingMode: 'vertical-rl',
       transform: 'rotate(-180deg)',
       transformOrigin: 'bottom center',
-      fontWeight: 'bold',
       marginTop: '-15%'
     },
     uiOptionsResetStates: {
@@ -46511,6 +46519,7 @@ var getSxClasses = function getSxClasses(theme) {
       }
     },
     checkDatasetLabel: {
+      fontFamily: theme.typography.body1.fontFamily,
       display: 'inline-flex',
       verticalAlign: 'middle',
       marginRight: '20px !important'
@@ -47880,6 +47889,23 @@ function GeoChart(props) {
   };
 
   /**
+   * Generate marker labels for the slider values
+   * @returns The array of slider markers
+   */
+  var getMarkers = useCallback(function (sliderValues, handleSliderValueDisplay) {
+    var sliderMarks = [];
+    if (Array.isArray(sliderValues)) {
+      for (var i = 0; i < sliderValues.length; i++) {
+        sliderMarks.push({
+          value: sliderValues[i],
+          label: handleSliderValueDisplay(sliderValues[i])
+        });
+      }
+    }
+    return sliderMarks;
+  }, []);
+
+  /**
    * Renders the X Chart Slider JSX.Element or an empty box
    * @returns The X Chart Slider JSX.Element or an empty box
    */
@@ -47891,6 +47917,7 @@ function GeoChart(props) {
         return /*#__PURE__*/(0,jsx_runtime.jsx)(Box, {
           sx: sxClasses.xSliderWrapper,
           children: /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
+            marks: getMarkers(xSliderValues, handleSliderXValueDisplay),
             min: xSliderMin,
             max: xSliderMax,
             step: xSliderSteps,
@@ -47919,6 +47946,7 @@ function GeoChart(props) {
         return /*#__PURE__*/(0,jsx_runtime.jsx)(Box, {
           sx: sxClasses.ySliderWrapper,
           children: /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
+            marks: getMarkers(ySliderValues, handleSliderYValueDisplay),
             min: ySliderMin,
             max: ySliderMax,
             step: ySliderSteps,
