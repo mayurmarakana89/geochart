@@ -46487,14 +46487,14 @@ var getSxClasses = function getSxClasses(theme) {
     xAxisLabel: {
       fontFamily: theme.typography.body1.fontFamily,
       fontWeight: theme.typography.fontWeightBold,
-      fontSize: theme.typography.body1.fontSize,
+      fontSize: theme.palette.geoViewFontSize["default"],
       textAlign: 'center',
       margin: '10px 0px'
     },
     yAxisLabel: {
       fontFamily: theme.typography.body1.fontFamily,
       fontWeight: theme.typography.fontWeightBold,
-      fontSize: theme.typography.body1.fontSize,
+      fontSize: theme.palette.geoViewFontSize["default"],
       position: 'relative',
       margin: 'auto',
       writingMode: 'vertical-rl',
@@ -46530,6 +46530,15 @@ var getSxClasses = function getSxClasses(theme) {
     xSliderWrapper: {
       '& .MuiSlider-root': {
         color: theme.palette.geoViewColor.primary.main
+      },
+      '& .MuiSlider-markLabel-first': {
+        marginTop: '-50px'
+      },
+      '& .MuiSlider-markLabel-last': {
+        marginTop: '-50px'
+      },
+      '& .MuiSlider-markLabel-overlap': {
+        marginTop: '20px'
       }
     },
     ySliderWrapper: {
@@ -46558,6 +46567,7 @@ var jsx_runtime = __webpack_require__(8521);
 
 function chart_ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function chart_objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? chart_ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : chart_ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+
 
 
 
@@ -47771,7 +47781,7 @@ function GeoChart(props) {
     // Default behavior
     // If current chart has time as xAxis
     if ((inputs === null || inputs === void 0 || (_inputs$geochart = inputs.geochart) === null || _inputs$geochart === void 0 ? void 0 : _inputs$geochart.xAxis.type) === 'time' || (inputs === null || inputs === void 0 || (_inputs$geochart2 = inputs.geochart) === null || _inputs$geochart2 === void 0 ? void 0 : _inputs$geochart2.xAxis.type) === 'timeseries') {
-      return new Date(value).toLocaleDateString(i18n.language, DATE_OPTIONS_LONG);
+      return new Date(value).toLocaleDateString(i18n.language, DATE_OPTIONS_AXIS);
     }
 
     // Default value as is
@@ -47892,18 +47902,114 @@ function GeoChart(props) {
    * Generate marker labels for the slider values
    * @returns The array of slider markers
    */
-  var getMarkers = useCallback(function (sliderValues, handleSliderValueDisplay) {
+  var getMarkers = useCallback(function (sliderMin, sliderMax, sliderValues, handleSliderValueDisplay) {
     var sliderMarks = [];
     if (Array.isArray(sliderValues)) {
+      sliderMarks.push({
+        value: sliderMin,
+        label: handleSliderValueDisplay(sliderMin)
+      });
       for (var i = 0; i < sliderValues.length; i++) {
+        if (sliderValues[i] === sliderMin || sliderValues[i] === sliderMax) {
+          continue;
+        }
         sliderMarks.push({
           value: sliderValues[i],
           label: handleSliderValueDisplay(sliderValues[i])
         });
       }
+      sliderMarks.push({
+        value: sliderMax,
+        label: handleSliderValueDisplay(sliderMax)
+      });
     }
     return sliderMarks;
   }, []);
+  var checkOverlap = function checkOverlap(prev, curr, next) {
+    var orientation = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'horizontal';
+    var labelPadding = 10;
+    var prevDim = prev ? prev.getBoundingClientRect() : null;
+    var currDim = curr ? curr.getBoundingClientRect() : null;
+    var nextDim = next ? next.getBoundingClientRect() : null;
+    if (prevDim === null || currDim === null || nextDim === null) {
+      return;
+    }
+    var hasPrevOverlap = false;
+    var hasNextOverlap = false;
+    if (prevDim) {
+      hasPrevOverlap = orientation === 'vertical' ? prevDim.bottom + labelPadding > currDim.top : prevDim.right + labelPadding > currDim.left;
+    }
+    if (nextDim) {
+      hasNextOverlap = orientation === 'vertical' ? currDim.bottom + labelPadding > nextDim.top : currDim.right + labelPadding > nextDim.left;
+    }
+    return hasPrevOverlap || hasNextOverlap;
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  var removeLabelOverlap = function removeLabelOverlap(containerId) {
+    var _document$getElementB;
+    // Log
+    logger.logTraceCore('UI.SLIDER - window resize event');
+
+    // get slider labels
+    var markers = containerId ? ((_document$getElementB = document.getElementById(containerId)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.getElementsByClassName('MuiSlider-markLabel')) || [] : document.getElementsByClassName('MuiSlider-markLabel');
+    for (var i = 0; i < markers.length; i++) {
+      markers[0].classList.add('MuiSlider-markLabel-first');
+      markers[markers.length - 1].classList.add('MuiSlider-markLabel-last');
+      markers[i].classList.remove('MuiSlider-markLabel-overlap');
+    }
+    var middleIndices = markers.length % 2 === 0 ? [markers.length / 2, markers.length / 2 + 1] : [Math.floor(markers.length / 2)];
+    var lastVisibleInFirstHalf = 0;
+    var firstVisibleInSecondHalf = markers.length - 1;
+
+    // Check first half
+    for (var prevIdx = 0, currIdx = 1; currIdx < markers.length / 2; currIdx++) {
+      // if there is a collision, set classname and test with the next pips
+      if (checkOverlap(markers[prevIdx], markers[currIdx], null)) {
+        markers[currIdx].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        // if there is no collision and reset the startIdx to be the one before the fwdIdx
+        prevIdx = currIdx - prevIdx !== 1 ? currIdx : prevIdx + 1;
+        lastVisibleInFirstHalf = currIdx;
+      }
+    }
+
+    // Check second half
+    for (var nextIdx = markers.length - 1, _currIdx = markers.length - 2; _currIdx > markers.length / 2; _currIdx--) {
+      if (checkOverlap(null, markers[_currIdx], markers[nextIdx])) {
+        markers[_currIdx].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        // if there is no  collision and reset the curIndex to be the one before the testIndex
+        nextIdx = nextIdx - _currIdx !== 1 ? _currIdx : nextIdx - 1;
+        firstVisibleInSecondHalf = _currIdx;
+      }
+    }
+    middleIndices.push(lastVisibleInFirstHalf, firstVisibleInSecondHalf);
+    middleIndices = _toConsumableArray(new Set(middleIndices)).sort(function (a, b) {
+      return a - b;
+    });
+
+    // Check middle elements
+    for (var testIdx = 0, _currIdx2 = 1; _currIdx2 < middleIndices.length; _currIdx2++) {
+      if (checkOverlap(markers[middleIndices[testIdx]], markers[middleIndices[_currIdx2]], _currIdx2 === middleIndices.length - 1 ? null : markers[middleIndices[_currIdx2 + 1]])) {
+        markers[middleIndices[_currIdx2]].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        testIdx = _currIdx2 - testIdx !== 1 ? _currIdx2 : testIdx + 1;
+      }
+    }
+  };
+  (0,external_cgpv_react_.useLayoutEffect)(function () {
+    // remove overlaping labels
+    removeLabelOverlap('xAxisSlider');
+    window.addEventListener('resize', function () {
+      return removeLabelOverlap;
+    });
+    return function () {
+      return window.removeEventListener('resize', function () {
+        return removeLabelOverlap;
+      });
+    };
+  }, [removeLabelOverlap]);
 
   /**
    * Renders the X Chart Slider JSX.Element or an empty box
@@ -47915,9 +48021,10 @@ function GeoChart(props) {
       var _inputs$ui2;
       if (inputs.chart === 'line' && (_inputs$ui2 = inputs.ui) !== null && _inputs$ui2 !== void 0 && (_inputs$ui2 = _inputs$ui2.xSlider) !== null && _inputs$ui2 !== void 0 && _inputs$ui2.display) {
         return /*#__PURE__*/(0,jsx_runtime.jsx)(Box, {
+          id: 'xAxisSlider',
           sx: sxClasses.xSliderWrapper,
           children: /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
-            marks: getMarkers(xSliderValues, handleSliderXValueDisplay),
+            marks: getMarkers(xSliderMin, xSliderMax, xSliderValues, handleSliderXValueDisplay),
             min: xSliderMin,
             max: xSliderMax,
             step: xSliderSteps,
@@ -47946,7 +48053,7 @@ function GeoChart(props) {
         return /*#__PURE__*/(0,jsx_runtime.jsx)(Box, {
           sx: sxClasses.ySliderWrapper,
           children: /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
-            marks: getMarkers(ySliderValues, handleSliderYValueDisplay),
+            marks: getMarkers(ySliderMin, ySliderMax, ySliderValues, handleSliderYValueDisplay),
             min: ySliderMin,
             max: ySliderMax,
             step: ySliderSteps,
