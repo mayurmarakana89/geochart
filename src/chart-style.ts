@@ -62,14 +62,14 @@ export const getSxClasses = (theme: Theme) => {
     xAxisLabel: {
       fontFamily: theme.typography.body1.fontFamily,
       fontWeight: theme.typography.fontWeightBold,
-      fontSize: theme.typography.body1.fontSize,
+      fontSize: theme.palette.geoViewFontSize.default,
       textAlign: 'center',
       margin: '10px 0px',
     },
     yAxisLabel: {
       fontFamily: theme.typography.body1.fontFamily,
       fontWeight: theme.typography.fontWeightBold,
-      fontSize: theme.typography.body1.fontSize,
+      fontSize: theme.palette.geoViewFontSize.default,
       position: 'relative',
       margin: 'auto',
       writingMode: 'vertical-rl',
@@ -105,6 +105,15 @@ export const getSxClasses = (theme: Theme) => {
     xSliderWrapper: {
       '& .MuiSlider-root': {
         color: theme.palette.geoViewColor.primary.main,
+      },
+      '& .MuiSlider-markLabel-first': {
+        marginTop: '-50px'
+      },
+      '& .MuiSlider-markLabel-last': {
+        marginTop: '-50px'
+      },
+      '& .MuiSlider-markLabel-overlap': {
+        marginTop: '20px',
       },
     },
     ySliderWrapper: {

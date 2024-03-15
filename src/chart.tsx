@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Chart as ChartJS, ChartType, ChartOptions, ChartData, ChartDataset, registerables, ChartConfiguration, Plugin } from 'chart.js';
 import { Chart as ChartReact } from 'react-chartjs-2';
@@ -15,7 +16,7 @@ import {
   TypeJsonObject,
   StepsPossibilitiesConst,
   StepsPossibilities,
-  DATE_OPTIONS_LONG,
+  DATE_OPTIONS_AXIS,
   GeoChartDatasetOption,
 } from './types';
 import { SchemaValidator, ValidatorResult } from './chart-schema-validator';
@@ -1314,7 +1315,7 @@ export function GeoChart<
     // Default behavior
     // If current chart has time as xAxis
     if (inputs?.geochart?.xAxis.type === 'time' || inputs?.geochart?.xAxis.type === 'timeseries') {
-      return new Date(value).toLocaleDateString(i18n.language, DATE_OPTIONS_LONG);
+      return new Date(value).toLocaleDateString(i18n.language, DATE_OPTIONS_AXIS);
     }
 
     // Default value as is
@@ -1422,21 +1423,126 @@ export function GeoChart<
    * Generate marker labels for the slider values
    * @returns The array of slider markers
    */
-  const getMarkers = useCallback((sliderValues: number | number[], handleSliderValueDisplay: (value: number) => string) => {
+  const getMarkers = useCallback((sliderMin: number, sliderMax: number, sliderValues: number | number[], handleSliderValueDisplay: (value: number) => string) => {
     const sliderMarks: {
       value: number;
       label: string;
     }[] = [];
     if (Array.isArray(sliderValues)) {
+      sliderMarks.push({
+        value: sliderMin,
+        label: handleSliderValueDisplay(sliderMin),
+      })
       for (let i = 0; i < sliderValues.length; i++) {
+        if (sliderValues[i] === sliderMin || sliderValues[i] === sliderMax) {
+          continue;
+        }
         sliderMarks.push({
           value: sliderValues[i],
           label: handleSliderValueDisplay(sliderValues[i]),
         });
       }
+      sliderMarks.push({
+        value: sliderMax,
+        label: handleSliderValueDisplay(sliderMax),
+      })
     }
     return sliderMarks;
   }, []);
+
+  const checkOverlap = (prev: Element | null, curr: Element | null, next: Element | null, orientation: string | undefined = 'horizontal') => {
+    const labelPadding = 10;
+
+    const prevDim = prev ? prev.getBoundingClientRect() : null;
+    const currDim = curr ? curr.getBoundingClientRect() : null;
+    const nextDim = next ? next.getBoundingClientRect() : null;
+    if (prevDim === null || currDim === null || nextDim === null) {
+      return;
+    }
+    let hasPrevOverlap = false;
+    let hasNextOverlap = false;
+
+    if (prevDim) {
+      hasPrevOverlap =
+        orientation === 'vertical' ? prevDim.bottom + labelPadding > currDim.top : prevDim.right + labelPadding > currDim.left;
+    }
+    if (nextDim) {
+      hasNextOverlap =
+        orientation === 'vertical' ? currDim.bottom + labelPadding > nextDim.top : currDim.right + labelPadding > nextDim.left;
+    }
+
+    return hasPrevOverlap || hasNextOverlap;
+  };
+  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const removeLabelOverlap = (containerId: string) => {
+    // Log
+    logger.logTraceCore('UI.SLIDER - window resize event');
+
+    // get slider labels
+    const markers = containerId
+      ? document.getElementById(containerId)?.getElementsByClassName('MuiSlider-markLabel') || []
+      : document.getElementsByClassName('MuiSlider-markLabel');
+
+    for (let i = 0; i < markers.length; i++) {
+      markers[0].classList.add('MuiSlider-markLabel-first');
+      markers[markers.length-1].classList.add('MuiSlider-markLabel-last');
+      markers[i].classList.remove('MuiSlider-markLabel-overlap');
+    }
+
+    let middleIndices = markers.length % 2 === 0 ? [markers.length / 2, markers.length / 2 + 1] : [Math.floor(markers.length / 2)];
+    let lastVisibleInFirstHalf = 0;
+    let firstVisibleInSecondHalf = markers.length - 1;
+
+    // Check first half
+    for (let prevIdx = 0, currIdx = 1; currIdx < markers.length / 2; currIdx++) {
+      // if there is a collision, set classname and test with the next pips
+      if (checkOverlap(markers[prevIdx], markers[currIdx], null)) {
+        markers[currIdx].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        // if there is no collision and reset the startIdx to be the one before the fwdIdx
+        prevIdx = currIdx - prevIdx !== 1 ? currIdx : prevIdx + 1;
+        lastVisibleInFirstHalf = currIdx;
+      }
+    }
+
+    // Check second half
+    for (let nextIdx = markers.length - 1, currIdx = markers.length - 2; currIdx > markers.length / 2; currIdx--) {
+      if (checkOverlap(null, markers[currIdx], markers[nextIdx])) {
+        markers[currIdx].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        // if there is no  collision and reset the curIndex to be the one before the testIndex
+        nextIdx = nextIdx - currIdx !== 1 ? currIdx : nextIdx - 1;
+        firstVisibleInSecondHalf = currIdx;
+      }
+    }
+
+    middleIndices.push(lastVisibleInFirstHalf, firstVisibleInSecondHalf);
+    middleIndices = [...new Set(middleIndices)].sort((a, b) => a - b);
+
+    // Check middle elements
+    for (let testIdx = 0, currIdx = 1; currIdx < middleIndices.length; currIdx++) {
+      if (
+        checkOverlap(
+          markers[middleIndices[testIdx]],
+          markers[middleIndices[currIdx]],
+          currIdx === middleIndices.length - 1 ? null : markers[middleIndices[currIdx + 1]]
+        )
+      ) {
+        markers[middleIndices[currIdx]].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        testIdx = currIdx - testIdx !== 1 ? currIdx : testIdx + 1;
+      }
+    }
+  };
+
+  useLayoutEffect(() => {
+    // remove overlaping labels
+    removeLabelOverlap('xAxisSlider');
+
+    window.addEventListener('resize', () => removeLabelOverlap);
+    return () => window.removeEventListener('resize', () => removeLabelOverlap);
+  }, [removeLabelOverlap]);
 
   /**
    * Renders the X Chart Slider JSX.Element or an empty box
@@ -1447,9 +1553,9 @@ export function GeoChart<
     if (inputs && selectedDatasource) {
       if (inputs.chart === 'line' && inputs.ui?.xSlider?.display) {
         return (
-          <Box sx={sxClasses.xSliderWrapper}>
+          <Box id={'xAxisSlider'} sx={sxClasses.xSliderWrapper}>
             <Slider
-              marks={getMarkers(xSliderValues, handleSliderXValueDisplay)}
+              marks={getMarkers(xSliderMin, xSliderMax, xSliderValues, handleSliderXValueDisplay)}
               min={xSliderMin}
               max={xSliderMax}
               step={xSliderSteps}
@@ -1472,13 +1578,14 @@ export function GeoChart<
    * @returns The Y Chart Slider JSX.Element or an empty box
    */
   const renderYSlider = (): JSX.Element => {
+
     // If inputs
     if (inputs && selectedDatasource) {
       if (inputs.chart === 'line' && inputs.ui?.ySlider?.display) {
         return (
           <Box sx={sxClasses.ySliderWrapper}>
             <Slider
-              marks={getMarkers(ySliderValues, handleSliderYValueDisplay)}
+              marks={getMarkers(ySliderMin, ySliderMax, ySliderValues, handleSliderYValueDisplay)}
               min={ySliderMin}
               max={ySliderMax}
               step={ySliderSteps}
