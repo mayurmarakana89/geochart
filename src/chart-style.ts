@@ -106,12 +106,8 @@ export const getSxClasses = (theme: Theme) => {
       '& .MuiSlider-root': {
         color: theme.palette.geoViewColor.primary.main,
       },
-      '& .MuiSlider-markLabel-first': {
-        marginTop: '-50px'
-      },
-      '& .MuiSlider-markLabel-last': {
-        marginTop: '-50px'
-      },
+      '& .MuiSlider-markLabel-first': {},
+      '& .MuiSlider-markLabel-last': {},
       '& .MuiSlider-markLabel-overlap': {
         marginTop: '20px',
       },

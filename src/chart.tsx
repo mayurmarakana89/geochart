@@ -1423,41 +1423,52 @@ export function GeoChart<
    * Generate marker labels for the slider values
    * @returns The array of slider markers
    */
-  const getMarkers = useCallback((sliderMin: number, sliderMax: number, sliderValues: number | number[], handleSliderValueDisplay: (value: number) => string) => {
-    const sliderMarks: {
-      value: number;
-      label: string;
-    }[] = [];
-    if (Array.isArray(sliderValues)) {
-      sliderMarks.push({
-        value: sliderMin,
-        label: handleSliderValueDisplay(sliderMin),
-      })
-      for (let i = 0; i < sliderValues.length; i++) {
-        if (sliderValues[i] === sliderMin || sliderValues[i] === sliderMax) {
-          continue;
+  const getMarkers = useCallback(
+    (sliderMin: number, sliderMax: number, sliderValues: number | number[], handleSliderValueDisplay: (value: number) => string) => {
+      const sliderMarks: {
+        value: number;
+        label: string;
+      }[] = [];
+      if (Array.isArray(sliderValues)) {
+        if (sliderMin !== undefined) {
+          sliderMarks.push({
+            value: sliderMin,
+            label: handleSliderValueDisplay(sliderMin),
+          });
         }
-        sliderMarks.push({
-          value: sliderValues[i],
-          label: handleSliderValueDisplay(sliderValues[i]),
-        });
+        for (let i = 0; i < sliderValues.length; i++) {
+          if (sliderValues[i] !== sliderMin || sliderValues[i] !== sliderMax) {
+            sliderMarks.push({
+              value: sliderValues[i],
+              label: handleSliderValueDisplay(sliderValues[i]),
+            });
+          }
+        }
+        if (sliderMax !== undefined) {
+          sliderMarks.push({
+            value: sliderMax,
+            label: handleSliderValueDisplay(sliderMax),
+          });
+        }
       }
-      sliderMarks.push({
-        value: sliderMax,
-        label: handleSliderValueDisplay(sliderMax),
-      })
-    }
-    return sliderMarks;
-  }, []);
+      return sliderMarks;
+    },
+    []
+  );
 
-  const checkOverlap = (prev: Element | null, curr: Element | null, next: Element | null, orientation: string | undefined = 'horizontal') => {
+  const checkOverlap = (
+    prev: Element | null,
+    curr: Element | null,
+    next: Element | null,
+    orientation: string | undefined = 'horizontal'
+  ): boolean => {
     const labelPadding = 10;
 
     const prevDim = prev ? prev.getBoundingClientRect() : null;
     const currDim = curr ? curr.getBoundingClientRect() : null;
     const nextDim = next ? next.getBoundingClientRect() : null;
     if (prevDim === null || currDim === null || nextDim === null) {
-      return;
+      return false;
     }
     let hasPrevOverlap = false;
     let hasNextOverlap = false;
@@ -1473,7 +1484,7 @@ export function GeoChart<
 
     return hasPrevOverlap || hasNextOverlap;
   };
-  
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const removeLabelOverlap = (containerId: string) => {
     // Log
@@ -1486,7 +1497,7 @@ export function GeoChart<
 
     for (let i = 0; i < markers.length; i++) {
       markers[0].classList.add('MuiSlider-markLabel-first');
-      markers[markers.length-1].classList.add('MuiSlider-markLabel-last');
+      markers[markers.length - 1].classList.add('MuiSlider-markLabel-last');
       markers[i].classList.remove('MuiSlider-markLabel-overlap');
     }
 
@@ -1553,9 +1564,9 @@ export function GeoChart<
     if (inputs && selectedDatasource) {
       if (inputs.chart === 'line' && inputs.ui?.xSlider?.display) {
         return (
-          <Box id={'xAxisSlider'} sx={sxClasses.xSliderWrapper}>
+          <Box id="xAxisSlider" sx={sxClasses.xSliderWrapper}>
             <Slider
-              marks={getMarkers(xSliderMin, xSliderMax, xSliderValues, handleSliderXValueDisplay)}
+              marks={getMarkers(undefined, undefined, xSliderValues, handleSliderXValueDisplay)}
               min={xSliderMin}
               max={xSliderMax}
               step={xSliderSteps}
