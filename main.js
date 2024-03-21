@@ -48306,7 +48306,7 @@ function GeoChart(props) {
           id: "xAxisSlider",
           sx: sxClasses.xSliderWrapper,
           children: /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
-            marks: getMarkers(undefined, undefined, xSliderValues, handleSliderXValueDisplay),
+            marks: getMarkers(xSliderMin, xSliderMax, xSliderValues, handleSliderXValueDisplay),
             min: xSliderMin,
             max: xSliderMax,
             step: xSliderSteps,
