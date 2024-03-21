@@ -1566,7 +1566,7 @@ export function GeoChart<
         return (
           <Box id="xAxisSlider" sx={sxClasses.xSliderWrapper}>
             <Slider
-              marks={getMarkers(undefined, undefined, xSliderValues, handleSliderXValueDisplay)}
+              marks={getMarkers(xSliderMin, xSliderMax, xSliderValues, handleSliderXValueDisplay)}
               min={xSliderMin}
               max={xSliderMax}
               step={xSliderSteps}
