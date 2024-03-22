@@ -48,9 +48,9 @@ export const getSxClasses = (theme: Theme) => {
       },
     },
     dataset: {
-      display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      textAlign: 'center',
     },
     title: {
       fontFamily: theme.typography.h5.fontFamily,
@@ -70,12 +70,13 @@ export const getSxClasses = (theme: Theme) => {
       fontFamily: theme.typography.body1.fontFamily,
       fontWeight: theme.typography.fontWeightBold,
       fontSize: theme.palette.geoViewFontSize.default,
-      position: 'relative',
-      margin: 'auto',
+      position: 'absolute',
+      top: '45%',
+      margin: '0 auto',
+      marginLeft: '20px',
       writingMode: 'vertical-rl',
       transform: 'rotate(-180deg)',
-      transformOrigin: 'bottom center',
-      marginTop: '-15%',
+      transformOrigin: 'center',
     },
     uiOptionsResetStates: {
       display: 'inline-flex',
@@ -97,7 +98,6 @@ export const getSxClasses = (theme: Theme) => {
       fontFamily: theme.typography.body1.fontFamily,
       display: 'inline-flex',
       verticalAlign: 'middle',
-      marginRight: '20px !important',
     },
     chartContent: {
       position: 'relative',
@@ -106,10 +106,24 @@ export const getSxClasses = (theme: Theme) => {
       '& .MuiSlider-root': {
         color: theme.palette.geoViewColor.primary.main,
       },
-      '& .MuiSlider-markLabel-first': {},
-      '& .MuiSlider-markLabel-last': {},
       '& .MuiSlider-markLabel-overlap': {
         marginTop: '20px',
+      },
+      '& .markLabel-first': {
+        fontFamily: theme.typography.body1.fontFamily,
+        fontSize: theme.palette.geoViewFontSize.sm,
+        float: 'left',
+        marginLeft: '-50px',
+        color: '#000',
+        opacity: 0.6,
+      },
+      '& .markLabel-last': {
+        fontFamily: theme.typography.body1.fontFamily,
+        fontSize: theme.palette.geoViewFontSize.sm,
+        float: 'right',
+        marginRight: '-50px',
+        color: '#000',
+        opacity: 0.6,
       },
     },
     ySliderWrapper: {

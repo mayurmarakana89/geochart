@@ -1565,8 +1565,16 @@ export function GeoChart<
       if (inputs.chart === 'line' && inputs.ui?.xSlider?.display) {
         return (
           <Box id="xAxisSlider" sx={sxClasses.xSliderWrapper}>
+            <div style={{ height: '16px' }}>
+              {Array.isArray(xSliderValues) && xSliderValues[0] !== xSliderMin && (
+                <span className="markLabel-first">{handleSliderXValueDisplay(xSliderMin)}</span>
+              )}
+              {Array.isArray(xSliderValues) && xSliderValues[xSliderValues.length - 1] !== xSliderMax && (
+                <span className="markLabel-last">{handleSliderXValueDisplay(xSliderMax)}</span>
+              )}
+            </div>
             <Slider
-              marks={getMarkers(xSliderMin, xSliderMax, xSliderValues, handleSliderXValueDisplay)}
+              marks={getMarkers(undefined, undefined, xSliderValues, handleSliderXValueDisplay)}
               min={xSliderMin}
               max={xSliderMax}
               step={xSliderSteps}
@@ -1589,7 +1597,6 @@ export function GeoChart<
    * @returns The Y Chart Slider JSX.Element or an empty box
    */
   const renderYSlider = (): JSX.Element => {
-
     // If inputs
     if (inputs && selectedDatasource) {
       if (inputs.chart === 'line' && inputs.ui?.ySlider?.display) {
@@ -1737,7 +1744,7 @@ export function GeoChart<
       if (Object.keys(datasetRegistry).length > 1) {
         const label = chartType === 'pie' || chartType === 'doughnut' ? `${t('geochart.category')}:` : '';
         return (
-          <>
+          <div>
             <Typography sx={sxClasses.checkDatasetWrapperLabel}>{label}</Typography>
             {Object.entries(datasetRegistry)
               .filter(([, dsOption]: [string, GeoChartDatasetOption]) => {
@@ -1746,7 +1753,6 @@ export function GeoChart<
               .map(([dsLabel, dsOption]: [string, GeoChartDatasetOption], idx: number) => {
                 let color;
                 if (chartType === 'line' || chartType === 'bar') color = dsOption.borderColor as string;
-
                 return (
                   <Box sx={sxClasses.checkDatasetWrapper} key={dsLabel || idx}>
                     <Checkbox
@@ -1761,7 +1767,7 @@ export function GeoChart<
                   </Box>
                 );
               })}
-          </>
+          </div>
         );
       }
     }
