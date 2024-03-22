@@ -46756,9 +46756,9 @@ var getSxClasses = function getSxClasses(theme) {
       }
     },
     dataset: {
-      display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      textAlign: 'center'
     },
     title: {
       fontFamily: theme.typography.h5.fontFamily,
@@ -46778,12 +46778,13 @@ var getSxClasses = function getSxClasses(theme) {
       fontFamily: theme.typography.body1.fontFamily,
       fontWeight: theme.typography.fontWeightBold,
       fontSize: theme.palette.geoViewFontSize["default"],
-      position: 'relative',
-      margin: 'auto',
+      position: 'absolute',
+      top: '45%',
+      margin: '0 auto',
+      marginLeft: '20px',
       writingMode: 'vertical-rl',
       transform: 'rotate(-180deg)',
-      transformOrigin: 'bottom center',
-      marginTop: '-15%'
+      transformOrigin: 'center'
     },
     uiOptionsResetStates: {
       display: 'inline-flex',
@@ -46804,8 +46805,7 @@ var getSxClasses = function getSxClasses(theme) {
     checkDatasetLabel: {
       fontFamily: theme.typography.body1.fontFamily,
       display: 'inline-flex',
-      verticalAlign: 'middle',
-      marginRight: '20px !important'
+      verticalAlign: 'middle'
     },
     chartContent: {
       position: 'relative'
@@ -46814,10 +46814,24 @@ var getSxClasses = function getSxClasses(theme) {
       '& .MuiSlider-root': {
         color: theme.palette.geoViewColor.primary.main
       },
-      '& .MuiSlider-markLabel-first': {},
-      '& .MuiSlider-markLabel-last': {},
       '& .MuiSlider-markLabel-overlap': {
         marginTop: '20px'
+      },
+      '& .markLabel-first': {
+        fontFamily: theme.typography.body1.fontFamily,
+        fontSize: theme.palette.geoViewFontSize.sm,
+        "float": 'left',
+        marginLeft: '-50px',
+        color: '#000',
+        opacity: 0.6
+      },
+      '& .markLabel-last': {
+        fontFamily: theme.typography.body1.fontFamily,
+        fontSize: theme.palette.geoViewFontSize.sm,
+        "float": 'right',
+        marginRight: '-50px',
+        color: '#000',
+        opacity: 0.6
       }
     },
     ySliderWrapper: {
@@ -48302,11 +48316,22 @@ function GeoChart(props) {
     if (inputs && selectedDatasource) {
       var _inputs$ui2;
       if (inputs.chart === 'line' && (_inputs$ui2 = inputs.ui) !== null && _inputs$ui2 !== void 0 && (_inputs$ui2 = _inputs$ui2.xSlider) !== null && _inputs$ui2 !== void 0 && _inputs$ui2.display) {
-        return /*#__PURE__*/(0,jsx_runtime.jsx)(Box, {
+        return /*#__PURE__*/(0,jsx_runtime.jsxs)(Box, {
           id: "xAxisSlider",
           sx: sxClasses.xSliderWrapper,
-          children: /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
-            marks: getMarkers(xSliderMin, xSliderMax, xSliderValues, handleSliderXValueDisplay),
+          children: [/*#__PURE__*/(0,jsx_runtime.jsxs)("div", {
+            style: {
+              height: '16px'
+            },
+            children: [Array.isArray(xSliderValues) && xSliderValues[0] !== xSliderMin && /*#__PURE__*/(0,jsx_runtime.jsx)("span", {
+              className: "markLabel-first",
+              children: handleSliderXValueDisplay(xSliderMin)
+            }), Array.isArray(xSliderValues) && xSliderValues[xSliderValues.length - 1] !== xSliderMax && /*#__PURE__*/(0,jsx_runtime.jsx)("span", {
+              className: "markLabel-last",
+              children: handleSliderXValueDisplay(xSliderMax)
+            })]
+          }), /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
+            marks: getMarkers(undefined, undefined, xSliderValues, handleSliderXValueDisplay),
             min: xSliderMin,
             max: xSliderMax,
             step: xSliderSteps,
@@ -48314,7 +48339,7 @@ function GeoChart(props) {
             onChangeCommitted: handleSliderXChange,
             onValueDisplay: handleSliderXValueDisplay,
             onValueDisplayAriaLabel: handleSliderXValueDisplay
-          })
+          })]
         });
       }
     }
@@ -48487,7 +48512,7 @@ function GeoChart(props) {
     if (inputs && chartData && inputs.category) {
       if (Object.keys(datasetRegistry).length > 1) {
         var label = chartType === 'pie' || chartType === 'doughnut' ? "".concat(t('geochart.category'), ":") : '';
-        return /*#__PURE__*/(0,jsx_runtime.jsxs)(jsx_runtime.Fragment, {
+        return /*#__PURE__*/(0,jsx_runtime.jsxs)("div", {
           children: [/*#__PURE__*/(0,jsx_runtime.jsx)(Typography, {
             sx: sxClasses.checkDatasetWrapperLabel,
             children: label
