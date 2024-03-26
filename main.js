@@ -46615,6 +46615,8 @@ function createChartJSOptions(chartConfig, defaultOptions, language) {
       x: {
         type: (_chartConfig$geochart5 = chartConfig.geochart.xAxis) === null || _chartConfig$geochart5 === void 0 ? void 0 : _chartConfig$geochart5.type,
         ticks: {
+          autoSkip: true,
+          maxTicksLimit: 20,
           major: {
             enabled: true
           },
@@ -46817,11 +46819,17 @@ var getSxClasses = function getSxClasses(theme) {
       '& .MuiSlider-markLabel-overlap': {
         marginTop: '20px'
       },
+      '& .MuiSlider-markLabel-first': {
+        marginLeft: '-40px'
+      },
+      '& .MuiSlider-markLabel-last': {
+        marginLeft: '40px'
+      },
       '& .markLabel-first': {
         fontFamily: theme.typography.body1.fontFamily,
         fontSize: theme.palette.geoViewFontSize.sm,
         "float": 'left',
-        marginLeft: '-50px',
+        marginLeft: '-60px',
         color: '#000',
         opacity: 0.6
       },
@@ -46829,16 +46837,25 @@ var getSxClasses = function getSxClasses(theme) {
         fontFamily: theme.typography.body1.fontFamily,
         fontSize: theme.palette.geoViewFontSize.sm,
         "float": 'right',
-        marginRight: '-50px',
+        marginRight: '-60px',
         color: '#000',
         opacity: 0.6
       }
     },
     ySliderWrapper: {
-      height: '75%',
+      height: '70%',
       textAlign: 'center',
+      marginTop: '-20px',
+      marginLeft: '20px',
       '& .MuiSlider-root': {
         color: theme.palette.geoViewColor.primary.main
+      },
+      '& .markLabel-top, & .markLabel-bottom': {
+        fontFamily: theme.typography.body1.fontFamily,
+        fontSize: theme.palette.geoViewFontSize.sm,
+        marginLeft: '-30px',
+        color: '#000',
+        opacity: 0.6
       }
     },
     loadingDatasource: {
@@ -48195,27 +48212,13 @@ function GeoChart(props) {
    * Generate marker labels for the slider values
    * @returns The array of slider markers
    */
-  var getMarkers = useCallback(function (sliderMin, sliderMax, sliderValues, handleSliderValueDisplay) {
+  var getMarkers = useCallback(function (sliderValues, handleSliderValueDisplay) {
     var sliderMarks = [];
     if (Array.isArray(sliderValues)) {
-      if (sliderMin !== undefined) {
-        sliderMarks.push({
-          value: sliderMin,
-          label: handleSliderValueDisplay(sliderMin)
-        });
-      }
       for (var i = 0; i < sliderValues.length; i++) {
-        if (sliderValues[i] !== sliderMin || sliderValues[i] !== sliderMax) {
-          sliderMarks.push({
-            value: sliderValues[i],
-            label: handleSliderValueDisplay(sliderValues[i])
-          });
-        }
-      }
-      if (sliderMax !== undefined) {
         sliderMarks.push({
-          value: sliderMax,
-          label: handleSliderValueDisplay(sliderMax)
+          value: sliderValues[i],
+          label: handleSliderValueDisplay(sliderValues[i])
         });
       }
     }
@@ -48331,7 +48334,7 @@ function GeoChart(props) {
               children: handleSliderXValueDisplay(xSliderMax)
             })]
           }), /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
-            marks: getMarkers(undefined, undefined, xSliderValues, handleSliderXValueDisplay),
+            marks: getMarkers(xSliderValues, handleSliderXValueDisplay),
             min: xSliderMin,
             max: xSliderMax,
             step: xSliderSteps,
@@ -48357,10 +48360,19 @@ function GeoChart(props) {
     if (inputs && selectedDatasource) {
       var _inputs$ui3;
       if (inputs.chart === 'line' && (_inputs$ui3 = inputs.ui) !== null && _inputs$ui3 !== void 0 && (_inputs$ui3 = _inputs$ui3.ySlider) !== null && _inputs$ui3 !== void 0 && _inputs$ui3.display) {
-        return /*#__PURE__*/(0,jsx_runtime.jsx)(Box, {
+        return /*#__PURE__*/(0,jsx_runtime.jsxs)(Box, {
           sx: sxClasses.ySliderWrapper,
-          children: /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
-            marks: getMarkers(ySliderMin, ySliderMax, ySliderValues, handleSliderYValueDisplay),
+          children: [/*#__PURE__*/(0,jsx_runtime.jsx)("div", {
+            style: {
+              height: '16px',
+              marginBottom: '10px'
+            },
+            children: Array.isArray(ySliderValues) && ySliderValues[ySliderValues.length - 1] !== ySliderMax && /*#__PURE__*/(0,jsx_runtime.jsx)("span", {
+              className: "markLabel-top",
+              children: handleSliderYValueDisplay(ySliderMax)
+            })
+          }), /*#__PURE__*/(0,jsx_runtime.jsx)(Slider, {
+            marks: getMarkers(ySliderValues, handleSliderYValueDisplay),
             min: ySliderMin,
             max: ySliderMax,
             step: ySliderSteps,
@@ -48369,7 +48381,15 @@ function GeoChart(props) {
             onChangeCommitted: handleSliderYChange,
             onValueDisplay: handleSliderYValueDisplay,
             onValueDisplayAriaLabel: handleSliderYValueDisplay
-          })
+          }), /*#__PURE__*/(0,jsx_runtime.jsx)("div", {
+            style: {
+              height: '16px'
+            },
+            children: Array.isArray(ySliderValues) && ySliderValues[0] !== ySliderMin && /*#__PURE__*/(0,jsx_runtime.jsx)("span", {
+              className: "markLabel-bottom",
+              children: handleSliderYValueDisplay(ySliderMin)
+            })
+          })]
         });
       }
     }
@@ -48605,6 +48625,9 @@ function GeoChart(props) {
       sx: chart_objectSpread(chart_objectSpread({}, sx), sxClasses.mainGeoChartContainer),
       children: /*#__PURE__*/(0,jsx_runtime.jsxs)(Grid, {
         container: true,
+        sx: {
+          m: '20px'
+        },
         children: [/*#__PURE__*/(0,jsx_runtime.jsxs)(Grid, {
           item: true,
           xs: 12,
