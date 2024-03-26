@@ -1423,38 +1423,21 @@ export function GeoChart<
    * Generate marker labels for the slider values
    * @returns The array of slider markers
    */
-  const getMarkers = useCallback(
-    (sliderMin: number, sliderMax: number, sliderValues: number | number[], handleSliderValueDisplay: (value: number) => string) => {
-      const sliderMarks: {
-        value: number;
-        label: string;
-      }[] = [];
-      if (Array.isArray(sliderValues)) {
-        if (sliderMin !== undefined) {
-          sliderMarks.push({
-            value: sliderMin,
-            label: handleSliderValueDisplay(sliderMin),
-          });
-        }
-        for (let i = 0; i < sliderValues.length; i++) {
-          if (sliderValues[i] !== sliderMin || sliderValues[i] !== sliderMax) {
-            sliderMarks.push({
-              value: sliderValues[i],
-              label: handleSliderValueDisplay(sliderValues[i]),
-            });
-          }
-        }
-        if (sliderMax !== undefined) {
-          sliderMarks.push({
-            value: sliderMax,
-            label: handleSliderValueDisplay(sliderMax),
-          });
-        }
+  const getMarkers = useCallback((sliderValues: number | number[], handleSliderValueDisplay: (value: number) => string) => {
+    const sliderMarks: {
+      value: number;
+      label: string;
+    }[] = [];
+    if (Array.isArray(sliderValues)) {
+      for (let i = 0; i < sliderValues.length; i++) {
+        sliderMarks.push({
+          value: sliderValues[i],
+          label: handleSliderValueDisplay(sliderValues[i]),
+        });
       }
-      return sliderMarks;
-    },
-    []
-  );
+    }
+    return sliderMarks;
+  }, []);
 
   const checkOverlap = (
     prev: Element | null,
@@ -1574,7 +1557,7 @@ export function GeoChart<
               )}
             </div>
             <Slider
-              marks={getMarkers(undefined, undefined, xSliderValues, handleSliderXValueDisplay)}
+              marks={getMarkers(xSliderValues, handleSliderXValueDisplay)}
               min={xSliderMin}
               max={xSliderMax}
               step={xSliderSteps}
@@ -1602,8 +1585,13 @@ export function GeoChart<
       if (inputs.chart === 'line' && inputs.ui?.ySlider?.display) {
         return (
           <Box sx={sxClasses.ySliderWrapper}>
+            <div style={{ height: '16px', marginBottom: '10px' }}>
+              {Array.isArray(ySliderValues) && ySliderValues[ySliderValues.length - 1] !== ySliderMax && (
+                <span className="markLabel-top">{handleSliderYValueDisplay(ySliderMax)}</span>
+              )}
+            </div>
             <Slider
-              marks={getMarkers(ySliderMin, ySliderMax, ySliderValues, handleSliderYValueDisplay)}
+              marks={getMarkers(ySliderValues, handleSliderYValueDisplay)}
               min={ySliderMin}
               max={ySliderMax}
               step={ySliderSteps}
@@ -1613,6 +1601,11 @@ export function GeoChart<
               onValueDisplay={handleSliderYValueDisplay}
               onValueDisplayAriaLabel={handleSliderYValueDisplay}
             />
+            <div style={{ height: '16px' }}>
+              {Array.isArray(ySliderValues) && ySliderValues[0] !== ySliderMin && (
+                <span className="markLabel-bottom">{handleSliderYValueDisplay(ySliderMin)}</span>
+              )}
+            </div>
           </Box>
         );
       }
@@ -1825,7 +1818,7 @@ export function GeoChart<
     // The xs: 1, 11 and 12 used here are as documented online
     return (
       <Paper sx={{ ...sx, ...sxClasses.mainGeoChartContainer }}>
-        <Grid container>
+        <Grid container sx={{ m: '20px' }}>
           <Grid item xs={12}>
             <Box sx={sxClasses.header}>
               {renderDatasourceSelector()}
