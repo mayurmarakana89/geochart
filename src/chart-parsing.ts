@@ -628,9 +628,12 @@ export function createChartJSOptions<TType extends ChartType>(
       x: {
         type: chartConfig.geochart.xAxis?.type,
         ticks: {
+          autoSkip: true,
+          maxTicksLimit: 20,
           major: {
             enabled: true,
           },
+          padding: 10,
           source: 'auto',
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           callback: (tickValue: number | Date | string, index: number, ticks: Tick[]): string => {
@@ -652,6 +655,7 @@ export function createChartJSOptions<TType extends ChartType>(
             return '';
           },
         },
+        offset: true,
       },
     };
   }

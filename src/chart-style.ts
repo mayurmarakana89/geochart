@@ -7,6 +7,7 @@ import { Theme } from '@mui/material/styles';
 export const getSxClasses = (theme: Theme) => {
   return {
     mainContainer: {
+      fontFamily: theme.typography.body1.fontFamily,
       borderColor: theme.palette.geoViewColor.primary.main,
       borderWidth: '2px',
       borderStyle: 'solid',
@@ -47,29 +48,35 @@ export const getSxClasses = (theme: Theme) => {
       },
     },
     dataset: {
-      display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      textAlign: 'center',
     },
     title: {
-      fontWeight: 'bold',
-      fontSize: theme.palette.geoViewFontSize.lg,
+      fontFamily: theme.typography.h5.fontFamily,
+      fontWeight: theme.typography.h5.fontWeight,
+      fontSize: theme.typography.h5.fontSize,
       textAlign: 'center',
       margin: '10px 0px',
     },
     xAxisLabel: {
+      fontFamily: theme.typography.body1.fontFamily,
+      fontWeight: theme.typography.fontWeightBold,
+      fontSize: theme.palette.geoViewFontSize.default,
       textAlign: 'center',
       margin: '10px 0px',
-      fontWeight: 'bold',
     },
     yAxisLabel: {
-      position: 'relative',
-      margin: 'auto',
+      fontFamily: theme.typography.body1.fontFamily,
+      fontWeight: theme.typography.fontWeightBold,
+      fontSize: theme.palette.geoViewFontSize.default,
+      position: 'absolute',
+      top: '45%',
+      margin: '0 auto',
+      marginLeft: '20px',
       writingMode: 'vertical-rl',
       transform: 'rotate(-180deg)',
-      transformOrigin: 'bottom center',
-      fontWeight: 'bold',
-      marginTop: '-15%',
+      transformOrigin: 'center',
     },
     uiOptionsResetStates: {
       display: 'inline-flex',
@@ -88,9 +95,9 @@ export const getSxClasses = (theme: Theme) => {
       },
     },
     checkDatasetLabel: {
+      fontFamily: theme.typography.body1.fontFamily,
       display: 'inline-flex',
       verticalAlign: 'middle',
-      marginRight: '20px !important',
     },
     chartContent: {
       position: 'relative',
@@ -99,12 +106,46 @@ export const getSxClasses = (theme: Theme) => {
       '& .MuiSlider-root': {
         color: theme.palette.geoViewColor.primary.main,
       },
+      '& .MuiSlider-markLabel-overlap': {
+        marginTop: '20px',
+      },
+      '& .MuiSlider-markLabel-first': {
+        marginLeft: '-40px',
+      },
+      '& .MuiSlider-markLabel-last': {
+        marginLeft: '40px',
+      },
+      '& .markLabel-first': {
+        fontFamily: theme.typography.body1.fontFamily,
+        fontSize: theme.palette.geoViewFontSize.sm,
+        float: 'left',
+        marginLeft: '-60px',
+        color: '#000',
+        opacity: 0.6,
+      },
+      '& .markLabel-last': {
+        fontFamily: theme.typography.body1.fontFamily,
+        fontSize: theme.palette.geoViewFontSize.sm,
+        float: 'right',
+        marginRight: '-60px',
+        color: '#000',
+        opacity: 0.6,
+      },
     },
     ySliderWrapper: {
-      height: '75%',
+      height: '70%',
       textAlign: 'center',
+      marginTop: '-20px',
+      marginLeft: '20px',
       '& .MuiSlider-root': {
         color: theme.palette.geoViewColor.primary.main,
+      },
+      '& .markLabel-top, & .markLabel-bottom': {
+        fontFamily: theme.typography.body1.fontFamily,
+        fontSize: theme.palette.geoViewFontSize.sm,
+        marginLeft: '-30px',
+        color: '#000',
+        opacity: 0.6,
       },
     },
     loadingDatasource: {
