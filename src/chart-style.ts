@@ -8,9 +8,9 @@ export const getSxClasses = (theme: Theme) => {
   return {
     mainContainer: {
       fontFamily: theme.typography.body1.fontFamily,
-      overflowY: 'auto',
     },
     mainGeoChartContainer: {
+      position: 'relative',
       padding: '20px',
       display: 'flex',
       borderColor: theme.palette.geoViewColor.primary.main,
